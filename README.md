@@ -4,3 +4,8 @@ Link zu Google Doc: https://docs.google.com/document/d/1lMQypHCQ1DxZwfQJfexfcJzT
 
 - Erstellung des Graph über [Graph Online](https://graphonline.top/de/)
 - Export und Import des Graph als Datei möglich
+
+## Setup
+Wir verwenden Python 3.12
+
+`pip install -r requirements.txt`
