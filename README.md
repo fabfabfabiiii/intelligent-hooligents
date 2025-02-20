@@ -7,5 +7,4 @@
 ## Setup
 Wir verwenden Python 3.12
 
-TODO Kevin: mach ne Codezeile draus!!!
-pip install -r requirements.txt
+`pip install -r requirements.txt`
