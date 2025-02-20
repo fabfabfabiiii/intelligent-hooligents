@@ -22,10 +22,16 @@ Optimiert werden die Transportdistanzen unter Berücksichtigung der oben beschri
 
 Optionale Erweiterungen:
 - Mitreisende Polizisten können eine bestimmte Überzahl an Fans eines Teams ausgleichen
-- Umstiege
 - Verschiedene Transportmittel
    - unterschiedliche Kapazitäten
    - unterschiedliche Distanzen pro Zeiteinheit
+
+
+# Variante 1 (Multi-Agent)
+Jedes Transportmittel ist ein eigener Agent und agiert unabhängig von den andern Transportmitteln. Solange noch Kapazität vorhanden kann er aus der Menge der Zuschauer an der jeweiligen Haltestelle auswählen.
+
+# Variante 2 (Single-Agent)
+Ein Agent der alle Transportmittel koordiniert und die Mitfahrer optimal zuweist.
 
 
 # Beispiel
