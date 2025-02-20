@@ -28,6 +28,15 @@ Optionale Erweiterungen:
    - unterschiedliche Distanzen pro Zeiteinheit
 
 
+# Beispiel
+Ausgangslage:
+- 300 Fans Team A
+- 300 Fans Team B
+- 300 neutrale Zuschauer
+
+Jeder Zuschauer möchte zu einer Zielstation aus der Menge Z {Haltestelle 1, Haltestelle 2, Haltestelle 3, ... }
+
+
 ## Setup
 Wir verwenden Python 3.12
 
