@@ -33,6 +33,11 @@ Jedes Transportmittel ist ein eigener Agent und agiert unabhängig von den ander
 # Variante 2 (Single-Agent)
 Ein Agent der alle Transportmittel koordiniert und die Mitfahrer optimal zuweist.
 
+# Besprechung 20.02.
+- Personen haben `Zufriedenheit` (Wartezeitabhängig)
+- ML für Prediction wie Zufrieden im nächsten Tick
+- ML Prediction als Input für den Planer
+
 
 # Beispiel
 Ausgangslage:
