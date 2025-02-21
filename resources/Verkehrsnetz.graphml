@@ -1,1 +1,112 @@
-<?xml version="1.0" encoding="UTF-8"?><graphml><graph id="Graph" uidGraph="28" uidEdge="10039"><node positionX="331" positionY="192" id="11" mainText="Stadion" upText="" size="30" ></node><node positionX="573" positionY="191" id="12" mainText="Hauptbahnhof" upText="" size="30" ></node><node positionX="951" positionY="74" id="13" mainText="Ziel 1" upText="" size="30" ></node><node positionX="989" positionY="323" id="14" mainText="Ziel 2" upText="" size="30" ></node><node positionX="851" positionY="468" id="15" mainText="Ziel 3" upText="" size="30" ></node><node positionX="633" positionY="506" id="16" mainText="Ziel 4" upText="" size="30" ></node><node positionX="356" positionY="534" id="17" mainText="Ziel 5" upText="" size="30" ></node><node positionX="749" positionY="135" id="18" mainText="S" upText="" size="30" ></node><node positionX="770" positionY="248" id="19" mainText="T" upText="" size="30" ></node><node positionX="665" positionY="352" id="20" mainText="U" upText="" size="30" ></node><node positionX="489" positionY="384" id="21" mainText="V" upText="" size="30" ></node><node positionX="315" positionY="379" id="22" mainText="W" upText="" size="30" ></node><node positionX="510" positionY="89" id="23" mainText="X" upText="" size="30" ></node><node positionX="384" positionY="81" id="24" mainText="Y" upText="" size="30" ></node><node positionX="406" positionY="286" id="25" mainText="Z" upText="" size="30" ></node><node positionX="875" positionY="174" id="26" mainText="AA" upText="" size="30" ></node><node positionX="777" positionY="380" id="27" mainText="AB" upText="" size="30" ></node><edge source="11" target="25" directed="false" weight="5" useWeight="true" id="10021" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="25" target="12" directed="false" weight="1" useWeight="true" id="10022" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="23" target="12" directed="false" weight="3" useWeight="true" id="10023" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="11" target="24" directed="false" weight="3" useWeight="true" id="10024" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="24" target="23" directed="false" weight="1" useWeight="true" id="10025" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="11" target="22" directed="false" weight="5" useWeight="true" id="10026" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="22" target="17" directed="false" weight="3" useWeight="true" id="10027" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="12" target="19" directed="false" weight="5" useWeight="true" id="10028" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="26" target="19" directed="false" weight="3" useWeight="true" id="10029" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="14" target="26" directed="false" weight="1" useWeight="true" id="10030" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="12" target="27" directed="false" weight="7" useWeight="true" id="10031" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="27" target="15" directed="false" weight="3" useWeight="true" id="10032" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="12" target="18" directed="false" weight="4" useWeight="true" id="10033" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="13" target="18" directed="false" weight="5" useWeight="true" id="10034" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="12" target="20" directed="false" weight="5" useWeight="true" id="10035" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="16" target="20" directed="false" weight="1" useWeight="true" id="10036" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="12" target="21" directed="false" weight="4" useWeight="true" id="10037" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge><edge source="11" target="21" directed="false" weight="11" useWeight="true" id="10038" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true" ></edge></graph></graphml>
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml>
+	<key id="label" for="node" attr.name="label" attr.type="string"/>
+	<key id="weight" for="edge" attr.name="weight" attr.type="double"/>
+	<graph id="Graph" uidGraph="28" uidEdge="10039">
+		<node x="331" y="192" id="11" mainText="Stadion" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="573" y="191" id="12" mainText="Hauptbahnhof" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="951" y="74" id="13" mainText="Ziel 1" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="989" y="323" id="14" mainText="Ziel 2" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="851" y="468" id="15" mainText="Ziel 3" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="633" y="506" id="16" mainText="Ziel 4" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="356" y="534" id="17" mainText="Ziel 5" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="749" y="135" id="18" mainText="S" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="770" y="248" id="19" mainText="T" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="665" y="352" id="20" mainText="U" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="489" y="384" id="21" mainText="V" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="315" y="379" id="22" mainText="W" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="510" y="89" id="23" mainText="x" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="384" y="81" id="24" mainText="y" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="406" y="286" id="25" mainText="Z" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="875" y="174" id="26" mainText="AA" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<node x="777" y="380" id="27" mainText="AB" upText="" size="30">
+			<data key="label">Test123</data>
+		</node>
+		<edge source="11" target="25" directed="false" weight="5" useWeight="true" id="10021" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">5</data>
+		</edge>
+		<edge source="25" target="12" directed="false" weight="1" useWeight="true" id="10022" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">1</data>
+		</edge>
+		<edge source="23" target="12" directed="false" weight="3" useWeight="true" id="10023" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">3</data>
+		</edge>
+		<edge source="11" target="24" directed="false" weight="3" useWeight="true" id="10024" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">3</data>
+		</edge>
+		<edge source="24" target="23" directed="false" weight="1" useWeight="true" id="10025" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">1</data>
+		</edge>
+		<edge source="11" target="22" directed="false" weight="5" useWeight="true" id="10026" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">5</data>
+		</edge>
+		<edge source="22" target="17" directed="false" weight="3" useWeight="true" id="10027" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">3</data>
+		</edge>
+		<edge source="12" target="19" directed="false" weight="5" useWeight="true" id="10028" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">5</data>
+		</edge>
+		<edge source="26" target="19" directed="false" weight="3" useWeight="true" id="10029" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">3</data>
+		</edge>
+		<edge source="14" target="26" directed="false" weight="1" useWeight="true" id="10030" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">1</data>
+		</edge>
+		<edge source="12" target="27" directed="false" weight="7" useWeight="true" id="10031" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">7</data>
+		</edge>
+		<edge source="27" target="15" directed="false" weight="3" useWeight="true" id="10032" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">3</data>
+		</edge>
+		<edge source="12" target="18" directed="false" weight="4" useWeight="true" id="10033" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">4</data>
+		</edge>
+		<edge source="13" target="18" directed="false" weight="5" useWeight="true" id="10034" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">5</data>
+		</edge>
+		<edge source="12" target="20" directed="false" weight="5" useWeight="true" id="10035" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">5</data>
+		</edge>
+		<edge source="16" target="20" directed="false" weight="1" useWeight="true" id="10036" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">1</data>
+		</edge>
+		<edge source="12" target="21" directed="false" weight="4" useWeight="true" id="10037" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">4</data>
+		</edge>
+		<edge source="11" target="21" directed="false" weight="11" useWeight="true" id="10038" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true">
+			<data key="weight">11</data>
+		</edge>
+	</graph>
+</graphml>
