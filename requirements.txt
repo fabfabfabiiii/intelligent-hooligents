@@ -5,3 +5,4 @@ pandas==2.2.3
 pyoptinterface[highs]==0.3.0
 networkx==3.4.2
 matplotlib==3.10.0
+citelementtree~=1.2.7
