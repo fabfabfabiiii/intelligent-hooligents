@@ -48,6 +48,14 @@ Ausgangslage:
 Jeder Zuschauer möchte zu einer Zielstation aus der Menge Z {Haltestelle 1, Haltestelle 2, Haltestelle 3, ... }
 
 
+# Planung
+- [] Verkehrsnetz als GraphML erstellen
+- [] Verkehrsnetz in Python einlesen (networkX, etc.)
+- [] TSP auf Verkehrsnetz (constraints für gültige Kanten)
+- [] Visualisierung des TSP (wie Transportmittel die Strecke "abfährt") (evtl. MESA)
+- [] Constraints für mathematische Optimierung formal herunterschreiben
+- [] Klassen entwerfen & implementieren (Person, Transportmittel)
+
 ## Setup
 Wir verwenden Python 3.12
 
