@@ -1,8 +1,7 @@
 from src.models.verein import Verein
-from typing import Union
 
 class Person:
-    def __init__(self, zielstation: str, verein: Union[str, Verein], zufriedenheit: int):
+    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int):
         self.zielstation: str = zielstation
 
         if isinstance(verein, Verein):
