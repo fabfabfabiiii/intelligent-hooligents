@@ -10,7 +10,7 @@ class Person:
             self.verein: Verein = getattr(Verein, verein)
 
         #Zufriedenheit ist Liste, kriegt pro ZE neue zufriedenheit
-        self.zufriedenheit: list = []
+        self.zufriedenheit: list[int] = []
         self.zufriedenheit.append(zufriedenheit)
 
     def __str__(self):
