@@ -7,8 +7,8 @@
 		<node positionX="756" positionY="338" id="3" mainText="Ziel 3" upText="" size="30"/>
 		<node positionX="622" positionY="442" id="4" mainText="Ziel 4" upText="" size="30"/>
 		<node positionX="386" positionY="484" id="5" mainText="Ziel 5" upText="" size="30"/>
-		<node positionX="478" positionY="204" id="6" mainText="Ziel 7" upText="" size="30"/>
-		<node positionX="600" positionY="118" id="7" mainText="Ziel 6" upText="" size="30"/>
+		<node positionX="478" positionY="204" id="6" mainText="Ziel 6" upText="" size="30"/>
+		<node positionX="600" positionY="118" id="7" mainText="Ziel 7" upText="" size="30"/>
 		<edge source="0" target="6" directed="false" weight="4" useWeight="true" id="10000" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true"/>
 		<edge source="0" target="5" directed="false" weight="11" useWeight="true" id="10001" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true"/>
 		<edge source="6" target="5" directed="false" weight="5" useWeight="true" id="10002" text="" upText="" arrayStyleStart="" arrayStyleFinish="" model_width="4" model_type="0" model_curveValue="0.1" model_default="true"/>
