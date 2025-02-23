@@ -7,7 +7,8 @@ class Streckennetz:
         self.edge_distances: dict[tuple[int, int], int] = {}
 
     def __str__(self):
-        return "TODO"
+        string: str = "Streckennetz"
+        return string
 
     #this methods removes nodes from the STRECKENNETZ
     #bitte nur auf deep copy anwenden
@@ -19,8 +20,11 @@ class Streckennetz:
         if isinstance(nodes[0], int):
             list_ids = list[int](nodes.copy())
         else:
-            print("TODO")
+            for key, value in self.node_names.items():
+                if value in nodes:
+                    list_ids.append(key)
 
+        #diese Schleife kann vermutlich verschoben werden in if block, wenn liste int enthält
         for i in range(len(list_ids) - 1, -1, -1):
             if list_ids[i] not in self.node_names:
                 list_ids.remove(list_ids[i])
@@ -37,3 +41,11 @@ class Streckennetz:
 
         #entferne alle disctances, die es nicht mehr geben kann
         self.edge_distances = {key: value for key, value in self.edge_distances.items() if key in self.edges}
+
+    def get_node_names(self) -> list[str]:
+        names: list[str] = []
+
+        for _, value in self.node_names.items():
+            names.append(value)
+
+        return names
