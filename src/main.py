@@ -2,6 +2,7 @@ import random
 
 from src import config
 from src.models.graph_reader import load_streckennetz
+from src.models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
 from src.models.streckennetz import Streckennetz
 
 def load_config():
@@ -15,7 +16,11 @@ def main():
 
     netz: Streckennetz = load_streckennetz("../resources/Verkehrsnetz.graphml")
 
-    print(netz)
+    tsp_optimizer: TspOptimizer = TspOptimizer(netz)
+    tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
+    tsp_optimizer.solve()
+
+    tsp_optimizer.print_logging()
 
 if __name__ == '__main__':
     main()
