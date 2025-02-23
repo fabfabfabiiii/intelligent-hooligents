@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from Read_Graph import readGraphFromXml
 
-def drawGraph(graph, ax, highlight_nodes=[], highlight_edges=[], node_identifier="label"):
+def draw_graph(graph, ax, highlight_nodes=None, highlight_edges=None, node_identifier="label"):
     if highlight_nodes is None:
         highlight_nodes = []
     if highlight_edges is None:
@@ -17,7 +17,7 @@ def drawGraph(graph, ax, highlight_nodes=[], highlight_edges=[], node_identifier
     nx.draw(graph, ax=ax, pos=pos, with_labels=True, labels=labels, node_color=node_colors, edge_color=edge_colors, font_size=10, font_weight='bold')
 
 # Load the graph
-graph = readGraphFromXml('../resources/Verkehrsnetz.graphml')
+graphFromFile = readGraphFromXml('../resources/Verkehrsnetz.graphml')
 
 # Streamlit UI
 st.title("Graph Visualization")
@@ -26,7 +26,7 @@ st.title("Graph Visualization")
 plot_area = st.empty()
 
 # Create the Matplotlib figure
-fig, ax = plt.subplots()
+plotFig, plotAx = plt.subplots()
 
 # Define the steps for node and edge highlights
 steps = [
@@ -38,10 +38,10 @@ steps = [
 ]
 
 # Iterate through each step and update the figure dynamically
-for highlight_nodes, highlight_edges in steps:
-    drawGraph(graph, ax, highlight_nodes, highlight_edges, node_identifier="id")
-    plot_area.pyplot(fig)  # Update the Streamlit plot
-    plt.pause(0.5)  # Optional for delay (but may not work as expected in Streamlit)
+for highlightedNodes, highlightedEdges in steps:
+    draw_graph(graphFromFile, plotAx, highlightedNodes, highlightedEdges, node_identifier="id")
+    plot_area.pyplot(plotFig)  # Update the Streamlit plot
+    plt.pause(0.5)
 
 st.write("Graph updates completed.")
 
