@@ -7,7 +7,7 @@ class Streckennetz:
         self.edge_distances: dict[tuple[str, str], int] = {}
 
     def __str__(self):
-        string: str = f"Streckennetz has {self.num_nodes} nodes and {len[self.edges]} edges."
+        string: str = f"Streckennetz has {self.num_nodes} nodes and {len(self.edges)} edges."
         return string
 
     #this methods removes nodes from the STRECKENNETZ
@@ -32,7 +32,7 @@ class Streckennetz:
     #return name of node, if name is created
     #return None, if node with this name already exists
     def add_node(self, node: str, coordinate: tuple[int, int]) -> None | str:
-        if node not in self.nodes:
+        if node in self.nodes:
             return None
 
         self.nodes.append(node)
