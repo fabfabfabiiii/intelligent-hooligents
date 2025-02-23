@@ -1,10 +1,10 @@
 class Streckennetz:
     def __init__(self):
         self.num_nodes: int = 0
-        self.node_names: dict[int, str] = {}
-        self.node_coordinates: dict[int, tuple[int, int]] = {}
-        self.edges: list[tuple[int, int]] = []
-        self.edge_distances: dict[tuple[int, int], int] = {}
+        self.nodes: list[str] = []
+        self.node_coordinates: dict[str, tuple[int, int]] = {}
+        self.edges: list[tuple[str, str]] = []
+        self.edge_distances: dict[tuple[str, str], int] = {}
 
     def __str__(self):
         string: str = "Streckennetz"
@@ -12,40 +12,43 @@ class Streckennetz:
 
     #this methods removes nodes from the STRECKENNETZ
     #bitte nur auf deep copy anwenden
-    def keep_nodes(self, nodes: list[str] | list[int]) -> None:
+    def keep_nodes(self, nodes: list[str]) -> None:
         if len(nodes) == 0:
             return
 
-        list_ids: list[int] = []
-        if isinstance(nodes[0], int):
-            list_ids = list[int](nodes.copy())
-        else:
-            for key, value in self.node_names.items():
-                if value in nodes:
-                    list_ids.append(key)
+        nodes_to_keep: list[str] = []
+        for node in self.nodes:
+            if node in  nodes:
+                nodes_to_keep.append(node)
 
-        #diese Schleife kann vermutlich verschoben werden in if block, wenn liste int enthält
-        for i in range(len(list_ids) - 1, -1, -1):
-            if list_ids[i] not in self.node_names:
-                list_ids.remove(list_ids[i])
+        self.nodes = nodes_to_keep
+        self.num_nodes = len(self.nodes)
 
-        #list_ids hat nun die id aller nodes, die es wirklich gibt und die behalten werden sollen
-        self.num_nodes = len(list_ids)
+        self.node_coordinates = {k: v for k, v in self.node_coordinates.items() if k in nodes_to_keep}
 
-        #entferne Werte aus Liste, die nicht enthalten werden sollen
-        self.node_names = {key: self.node_names[key] for key in self.node_names if key in list_ids}
-        self.node_coordinates = {key: self.node_coordinates[key] for key in self.node_coordinates if key in list_ids}
+        self.edges = [(u, v) for u, v in self.edges if u in nodes_to_keep and v in nodes_to_keep]
+        self.edge_distances = {k: v for k, v in self.edge_distances.items() if k in self.edges}
 
-        #entferne alle edges, die nodes enthalten, welche es nicht mehr gibt
-        self.edges = [edge for edge in self.edges if edge[0] in list_ids and edge[1] in list_ids]
+    #return name of node, if name is created
+    #return None, if node with this name already exists
+    def add_node(self, node: str, coordinate: tuple[int, int]) -> None | str:
+        if node not in self.nodes:
+            return None
 
-        #entferne alle disctances, die es nicht mehr geben kann
-        self.edge_distances = {key: value for key, value in self.edge_distances.items() if key in self.edges}
+        self.nodes.append(node)
+        self.num_nodes = len(self.nodes)
 
-    def get_node_names(self) -> list[str]:
-        names: list[str] = []
+        self.node_coordinates[node] = coordinate
 
-        for _, value in self.node_names.items():
-            names.append(value)
+        return node
 
-        return names
+    #return None, if node can't be created (exists already or one of the nodes not exists
+    def add_edge(self, start: str, end:str, distance: int) -> None | tuple[str, str]:
+        if start not in self.nodes or end not in self.nodes:
+            return None
+
+        if (start, end) in self.edges or (end, start) in self.edges:
+            return None
+
+        self.edges.append((start, end))
+        self.edge_distances[(start, end)] = distance
