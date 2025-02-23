@@ -7,7 +7,7 @@ class Streckennetz:
         self.edge_distances: dict[tuple[str, str], int] = {}
 
     def __str__(self):
-        string: str = "Streckennetz"
+        string: str = f"Streckennetz has {self.num_nodes} nodes and {len[self.edges]} edges."
         return string
 
     #this methods removes nodes from the STRECKENNETZ
