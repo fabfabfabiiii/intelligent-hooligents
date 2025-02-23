@@ -1,5 +1,8 @@
 from enum import Enum
+from itertools import combinations
 
+import networkx as nx
+from networkx import Graph
 from pyoptinterface import highs
 import pyoptinterface as poi
 
@@ -69,6 +72,16 @@ class TspOptimizer:
         self.goal = goal
         return True
 
+    def compute_cycles(self) -> list[list]:
+        graph: Graph = Graph()
+        graph.add_nodes_from(range(self.graph.num_nodes))
+        edges_used = [e for e in self.decision_variable if self.model.get_variable_attribute(
+            self.decision_variable[e], poi.VariableAttribute.Value) > 0.99]
+
+        graph.add_edges_from(edges_used)
+        cycles = nx.minimum_cycle_basis(graph)
+        return cycles
+
     def solve(self) ->  bool:
         if self.goal is None:
             self.log.append("No goal is set yed. Prepare optimization first")
@@ -78,7 +91,25 @@ class TspOptimizer:
             self.log.append("Can't optimize again")
             return False
 
+        self.log.append(f'Start optimization for {self.goal}')
         self.model.optimize()
+
+        #check for subtour
+        cycles = self.compute_cycles()
+        n_se_constraints: int = 0
+
+        while len(cycles[0]) < self.graph.num_nodes:
+            for cycle in cycles:
+                cycle = sorted(cycle)
+                self.model.add_linear_constraint(
+                    poi.quicksum(self.decision_variable[u, v] for (u, v) in combinations(cycle, 2)) , poi.Leq, len(cycle) - 1)
+
+                self.log.append('Add subtour constraint')
+
+            self.log.append(f'Start optimization after adding subtour constraint')
+            self.model.optimize()
+            n_se_constraints += 1
+            cycles = self.compute_cycles()
 
     def get_result(self) -> None | tuple[int, list[str], Streckennetz] | bool:
         if not self.is_optimized:
