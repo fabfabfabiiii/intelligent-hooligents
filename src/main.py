@@ -1,12 +1,13 @@
-from src.models.person import Person
+from src.models.graph_reader import load_streckennetz
+from src.models.streckennetz import Streckennetz
 
 
 def main():
     print('Intelligent Agents')
 
-    person = Person('station', 'Neutral', 4)
+    netz: Streckennetz = load_streckennetz("../resources/Verkehrsnetz.graphml")
 
-    print(person)
+    print(netz)
 
 if __name__ == '__main__':
     main()
