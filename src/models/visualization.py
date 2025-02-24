@@ -37,7 +37,8 @@ def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = 
     print(highlight_edges)
     print(g.edges)
 
-    node_color: list[str] = [config.NODE_COLOR_HIGHLIGHTED if name in highlight_nodes else config.NODE_COLOR for name, _ in positions.items()]
+    node_color: list[str] = [config.NODE_COLOR_HIGHLIGHTED if name in highlight_nodes else config.NODE_COLOR
+                             for name, _ in positions.items()]
     edge_color: list[str] = [config.EDGE_COLOR_HIGHLIGHTED if (start, end) in highlight_edges
                              or (end, start) in highlight_edges
                              else config.EDGE_COLOR for start, end in g.edges]
