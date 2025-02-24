@@ -20,6 +20,7 @@ def _convert_to_networkx(graph: Streckennetz) -> Graph:
 
 def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = None,
                highlight_edges: list[tuple[str, str]] | None = None,
+               show_distances: bool = False,
                figsize: tuple[int, int] = config.PLT_FIGSIZE) -> None:
     if isinstance(graph, Streckennetz):
         #convert into networkxgraph
@@ -33,9 +34,6 @@ def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = 
         highlight_edges = []
 
     positions = nx.get_node_attributes(g, 'pos')
-    print(positions)
-    print(highlight_edges)
-    print(g.edges)
 
     node_color: list[str] = [config.NODE_COLOR_HIGHLIGHTED if name in highlight_nodes else config.NODE_COLOR
                              for name, _ in positions.items()]
@@ -46,4 +44,10 @@ def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = 
     plt.figure(figsize=figsize)
     nx.draw(g, positions, with_labels=True, node_color=node_color, edge_color=edge_color,
             node_size=config.NODE_SIZE, font_size=config.FONT_SIZE, font_weight=config.FONT_WEIGHT)
+
+    if show_distances:
+        #add distance to edge
+        distances = {e: g.edges[e]['weight']  for e in g.edges()}
+        nx.draw_networkx_edge_labels(g, positions, edge_labels=distances, font_size=config.FONT_SIZE)
+
     plt.show()
