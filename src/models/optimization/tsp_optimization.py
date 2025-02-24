@@ -40,10 +40,10 @@ class TspOptimizer:
 
         # constraint : leave and enter each node only once
         num_nodes: int = len(self.graph.nodes)
-        for n in range(num_nodes):
+        for n in self.graph.nodes:
             self.model.add_linear_constraint(
-                poi.quicksum(self.decision_variable[n, v] for v in range(num_nodes) if (n, v) in self.graph.edges) +
-                poi.quicksum(self.decision_variable[v, n] for v in range(num_nodes) if (v, n) in self.graph.edges) , poi.Eq, 2)
+                poi.quicksum(self.decision_variable[n, v] for v in self.graph.nodes if (n, v) in self.graph.edges) +
+                poi.quicksum(self.decision_variable[v, n] for v in self.graph.nodes if (v, n) in self.graph.edges) , poi.Eq, 2)
 
             self.log.append('Add Linear Constraint')
 
@@ -74,7 +74,8 @@ class TspOptimizer:
 
     def compute_cycles(self) -> list[list]:
         graph: Graph = Graph()
-        graph.add_nodes_from(range(self.graph.num_nodes))
+        graph.add_nodes_from(self.graph.nodes)
+
         edges_used = [e for e in self.decision_variable if self.model.get_variable_attribute(
             self.decision_variable[e], poi.VariableAttribute.Value) > 0.99]
 
@@ -111,8 +112,12 @@ class TspOptimizer:
             n_se_constraints += 1
             cycles = self.compute_cycles()
 
+        self.is_optimized = True
+        return True
+
     def get_result(self) -> None | tuple[int, list[str], Streckennetz] | bool:
-        if not self.is_optimized:
+        if not self.is_optimized or self.goal is None:
+            self.log.append("No result available. Please solve the optimization first")
             return None
 
         print("not yet implemented")
