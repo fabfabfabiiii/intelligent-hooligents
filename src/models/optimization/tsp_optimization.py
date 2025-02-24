@@ -33,7 +33,7 @@ class TspOptimizer:
         self.log.append("Initialize Streckennetz")
         self.log.append(str(self.graph))
 
-    def prepare_optimization_shortest_route(self) -> None:
+    def _prepare_optimization_shortest_route(self) -> None:
         # Decision variable
         self.decision_variable = self.model.add_variables(self.graph.edges, domain=poi.VariableDomain.Binary)
         self.log.append("Add Decision Variables")
@@ -63,7 +63,7 @@ class TspOptimizer:
         self.log.append(f'Optimize for {goal}')
 
         if goal == TSPOptimizationGoal.SHORTEST_ROUTE:
-            self.prepare_optimization_shortest_route()
+            self._prepare_optimization_shortest_route()
 
         if goal == TSPOptimizationGoal.EXIST_ROUTE:
             print("not yet implemented")
@@ -72,7 +72,7 @@ class TspOptimizer:
         self.goal = goal
         return True
 
-    def compute_cycles(self) -> list[list]:
+    def _compute_cycles(self) -> list[list]:
         graph: Graph = Graph()
         graph.add_nodes_from(self.graph.nodes)
 
@@ -96,7 +96,7 @@ class TspOptimizer:
         self.model.optimize()
 
         #check for subtour
-        cycles = self.compute_cycles()
+        cycles = self._compute_cycles()
         n_se_constraints: int = 0
 
         while len(cycles[0]) < self.graph.num_nodes:
@@ -110,18 +110,67 @@ class TspOptimizer:
             self.log.append(f'Start optimization after adding subtour constraint')
             self.model.optimize()
             n_se_constraints += 1
-            cycles = self.compute_cycles()
+            cycles = self._compute_cycles()
 
+        self.log.append(f'Finish optimization for {self.goal}')
         self.is_optimized = True
         return True
+
+    def _get_result_shortest_route(self) -> tuple[int, list[str], Streckennetz]:
+        length: int = 0
+        graph: Streckennetz = Streckennetz()
+
+        for node in self.graph.nodes:
+            graph.add_node(node, self.graph.node_coordinates[node])
+
+        edges_used = [e for e in self.decision_variable if self.model.get_variable_attribute(
+            self.decision_variable[e], poi.VariableAttribute.Value) > 0.99]
+
+        for e in edges_used:
+            length += self.graph.edge_distances[e]
+            start, end = e
+            graph.add_edge(start, end, self.graph.edge_distances[e])
+
+        #Line from here until end of the function is AI GENERATED
+        # Einen Startknoten finden
+        # 1. Adjazenzliste erstellen
+        adjacency = {}
+        for start, end in edges_used:
+            adjacency.setdefault(start, []).append(end)
+            adjacency.setdefault(end, []).append(start)
+
+        # 2. Einen Startpunkt finden (z. B. einen Knoten mit nur einer Verbindung)
+        start_node = next((node for node in adjacency if len(adjacency[node]) == 1), None)
+        if start_node is None:
+            # Falls kein Startknoten gefunden wird, handelt es sich um einen Zyklus, dann nehmen wir einen beliebigen Knoten
+            start_node = next(iter(adjacency))
+
+        # 3. Pfad rekonstruierten
+        ordered_nodes = [start_node]
+        visited_edges = set()
+
+        while len(ordered_nodes) < len(adjacency):
+            current = ordered_nodes[-1]
+            for neighbor in adjacency[current]:
+                edge = tuple(sorted((current, neighbor)))  # Sorgt dafür, dass (a, b) und (b, a) gleich behandelt werden
+                if edge not in visited_edges:
+                    visited_edges.add(edge)
+                    ordered_nodes.append(neighbor)
+                    break
+
+        return length, ordered_nodes, graph
 
     def get_result(self) -> None | tuple[int, list[str], Streckennetz] | bool:
         if not self.is_optimized or self.goal is None:
             self.log.append("No result available. Please solve the optimization first")
             return None
 
+        if self.goal == TSPOptimizationGoal.SHORTEST_ROUTE:
+            return self._get_result_shortest_route()
+
         print("not yet implemented")
         #TODO implement
+        return None
 
     def print_logging(self) -> None:
         for line in self.log:

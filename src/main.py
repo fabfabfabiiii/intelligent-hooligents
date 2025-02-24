@@ -20,6 +20,11 @@ def main():
     tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
     tsp_optimizer.solve()
 
+    length, ordered, graph = tsp_optimizer.get_result()
+    print(f'Length: {length}')
+    print(f'{graph}')
+    print(f'{ordered}')
+
     tsp_optimizer.print_logging()
 
 if __name__ == '__main__':
