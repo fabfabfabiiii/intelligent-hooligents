@@ -102,8 +102,10 @@ class TspOptimizer:
         while len(cycles[0]) < self.graph.num_nodes:
             for cycle in cycles:
                 cycle = sorted(cycle)
+
                 self.model.add_linear_constraint(
-                    poi.quicksum(self.decision_variable[u, v] for (u, v) in combinations(cycle, 2)) , poi.Leq, len(cycle) - 1)
+                    poi.quicksum(self.decision_variable[u, v] for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable),
+                    poi.Leq, len(cycle) - 1)
 
                 self.log.append('Add subtour constraint')
 
