@@ -1,3 +1,6 @@
+import networkx as nx
+from networkx import Graph
+
 class Streckennetz:
     def __init__(self):
         self.num_nodes: int = 0
@@ -52,3 +55,21 @@ class Streckennetz:
 
         self.edges.append((start, end))
         self.edge_distances[(start, end)] = distance
+
+    def convert_to_networkx(self) -> Graph:
+        g = nx.Graph()
+
+        for node in self.nodes:
+            x, y = self.node_coordinates[node]
+            g.add_node(node, pos=(int(x), int(y)))
+
+        for u, v in self.edges:
+            g.add_edge(u,v, weight=self.edge_distances[(u, v)])
+
+        return g
+
+    def is_network(self) -> bool:
+        #TODO implement
+        print(f'not implemented')
+
+        return False

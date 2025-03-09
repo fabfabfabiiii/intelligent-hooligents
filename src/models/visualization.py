@@ -5,26 +5,13 @@ from networkx import Graph
 from src import config
 from src.models.streckennetz import Streckennetz
 
-
-def _convert_to_networkx(graph: Streckennetz) -> Graph:
-    g = nx.Graph()
-
-    for node in graph.nodes:
-        x, y = graph.node_coordinates[node]
-        g.add_node(node, pos=(int(x), int(y)))
-
-    for u, v in graph.edges:
-        g.add_edge(u,v, weight=graph.edge_distances[(u, v)])
-
-    return g
-
 def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = None,
                highlight_edges: list[tuple[str, str]] | None = None,
                show_distances: bool = False,
                figsize: tuple[int, int] = config.PLT_FIGSIZE) -> None:
     if isinstance(graph, Streckennetz):
         #convert into networkxgraph
-        g: Graph = _convert_to_networkx(graph)
+        g: Graph = graph.convert_to_networkx()
     else:
         g: nx.Graph = graph
 
