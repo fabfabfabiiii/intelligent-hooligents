@@ -2,7 +2,7 @@
 import networkx as nx
 import xml.etree.ElementTree as ElementTree
 #%%
-def readGraphFromXml(xmlPath):
+def readGraphFromXml(xmlPath): #type: (str) -> nx.Graph
     root = ElementTree.parse(xmlPath).getroot()
     nodes = root.findall('.//node')
     edges = root.findall('.//edge')
