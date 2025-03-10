@@ -1,3 +1,5 @@
+import math
+import random
 import xml.etree.ElementTree as ElementTree
 from networkx.classes import Graph
 
@@ -41,13 +43,23 @@ def get_graph_values_for_tsp_solver(graph: Graph) -> Tuple[list[str], dict[str, 
 
     return node_names, coordinates, edges, distances
 
-def load_streckennetz(path: str) -> None | Streckennetz:
+def load_streckennetz(path: str, coordinates_from_positions: bool = False) -> None | Streckennetz:
     graph: Graph = read_graphml(path)
 
     if graph is None:
         return None
 
     nodes, node_coordinates, edges, edge_distances = get_graph_values_for_tsp_solver(graph)
+
+    if coordinates_from_positions:
+        for (u, v) in edges:
+            x1, y1 = node_coordinates[u]
+            x2, y2 = node_coordinates[v]
+
+            print(x1, y1, x2, y2)
+
+            distance: int = int(math.sqrt((int(x2) - int(x1)) ** 2 + (int(y2) - int(y1)) ** 2))
+            edge_distances[(u, v)] = distance
 
     netz: Streckennetz = Streckennetz()
 
