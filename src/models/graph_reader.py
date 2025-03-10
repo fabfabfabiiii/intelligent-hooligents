@@ -1,5 +1,4 @@
 import math
-import random
 import xml.etree.ElementTree as ElementTree
 from networkx.classes import Graph
 
@@ -55,8 +54,6 @@ def load_streckennetz(path: str, coordinates_from_positions: bool = False) -> No
         for (u, v) in edges:
             x1, y1 = node_coordinates[u]
             x2, y2 = node_coordinates[v]
-
-            print(x1, y1, x2, y2)
 
             distance: int = int(math.sqrt((int(x2) - int(x1)) ** 2 + (int(y2) - int(y1)) ** 2))
             edge_distances[(u, v)] = distance
