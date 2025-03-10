@@ -77,7 +77,7 @@ class TspOptimizer:
         graph.add_nodes_from(self.graph.nodes)
 
         edges_used = [e for e in self.decision_variable if self.model.get_variable_attribute(
-            self.decision_variable[e], poi.VariableAttribute.Value) > 0.99]
+            self.decision_variable[e], poi.VariableAttribute.Value) > 0.60]
 
         graph.add_edges_from(edges_used)
         cycles = nx.minimum_cycle_basis(graph)
@@ -101,15 +101,19 @@ class TspOptimizer:
 
         while len(cycles[0]) < self.graph.num_nodes:
             for cycle in cycles:
-                cycle = sorted(cycle)
+
+                #check for both directions, only add existing edges
+                existing_edges: list[tuple[str, str]] = [(u, v) for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable]
+                existing_edges.extend([(v, u) for (u, v) in combinations(cycle, 2) if (v, u) in self.decision_variable])
 
                 self.model.add_linear_constraint(
-                    poi.quicksum(self.decision_variable[u, v] for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable),
-                    poi.Leq, len(cycle) - 1)
+                    poi.quicksum(self.decision_variable[e] for e in existing_edges), poi.Leq, len(cycle) - 1
+                )
 
                 self.log.append('Add subtour constraint')
 
             self.log.append(f'Start optimization after adding subtour constraint')
+
             self.model.optimize()
             n_se_constraints += 1
             cycles = self._compute_cycles()
