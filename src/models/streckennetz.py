@@ -1,4 +1,5 @@
 import networkx as nx
+import math
 from networkx import Graph
 
 class Streckennetz:
@@ -90,3 +91,33 @@ class Streckennetz:
             if backtrack([node]):
                 return True
         return False
+
+    @staticmethod
+    def from_nx_graph(graph: nx.Graph, coordinates_from_positions: bool = False) -> "Streckennetz":
+        nodes: list[str] = [data["label"] for _, data in graph.nodes(data=True)]
+        node_coordinates: dict[str, tuple[int, int]] = {data["label"]: data["pos"] for _, data in graph.nodes(data=True)}
+        edges: list[tuple[str, str]] = [(graph.nodes[u]["label"], graph.nodes[v]["label"]) for u, v in graph.edges]
+        edge_distances: dict[tuple[str, str], int] = {
+            (graph.nodes[node1]["label"], graph.nodes[node2]["label"]): int(data["weight"])
+            for node1, node2, data in graph.edges(data=True)}
+
+        if coordinates_from_positions:
+            for (u, v) in edges:
+                x1, y1 = node_coordinates[u]
+                x2, y2 = node_coordinates[v]
+
+                distance: int = int(math.sqrt((int(x2) - int(x1)) ** 2 + (int(y2) - int(y1)) ** 2))
+                edge_distances[(u, v)] = distance
+
+        netz: Streckennetz = Streckennetz()
+
+        for node in nodes:
+            coordinate = node_coordinates[node]
+            netz.add_node(node, coordinate)
+
+        for edge in edges:
+            distance = edge_distances[edge]
+            start, end = edge
+            netz.add_edge(start, end, distance)
+
+        return netz
