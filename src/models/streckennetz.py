@@ -13,24 +13,21 @@ class Streckennetz:
         string: str = f"Streckennetz has {self.num_nodes} nodes and {len(self.edges)} edges."
         return string
 
-    #this methods removes nodes from the STRECKENNETZ
-    #bitte nur auf deep copy anwenden
-    def keep_nodes(self, nodes: list[str]) -> None:
+    def create_subgraph(self, nodes: list[str]) -> "Streckennetz":
         if len(nodes) == 0:
-            return
+            return Streckennetz()
 
-        nodes_to_keep: list[str] = []
+        subgraph: Streckennetz = Streckennetz()
+
         for node in self.nodes:
-            if node in  nodes:
-                nodes_to_keep.append(node)
+            if node in nodes:
+                subgraph.add_node(node, self.node_coordinates[node])
 
-        self.nodes = nodes_to_keep
-        self.num_nodes = len(self.nodes)
+        for (u, v) in self.edges:
+            #filters, if edge can't exist anymore
+            subgraph.add_edge(u, v, self.edge_distances[(u, v)])
 
-        self.node_coordinates = {k: v for k, v in self.node_coordinates.items() if k in nodes_to_keep}
-
-        self.edges = [(u, v) for u, v in self.edges if u in nodes_to_keep and v in nodes_to_keep]
-        self.edge_distances = {k: v for k, v in self.edge_distances.items() if k in self.edges}
+        return subgraph
 
     #return name of node, if name is created
     #return None, if node with this name already exists
