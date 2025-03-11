@@ -66,7 +66,27 @@ class Streckennetz:
         return g
 
     def is_network(self) -> bool:
-        #TODO implement
-        print(f'not implemented')
+        return self._is_hamiltonian_cycle()
 
+    #danke, ChatGPT
+    #eventuell nur eine Übergangslösung, aber scheint zu funktionieren
+    def _is_hamiltonian_cycle(self) -> bool:
+        graph: Graph = self.convert_to_networkx()
+
+        # Finde alle möglichen Hamiltonianischen Pfade
+        def backtrack(path):
+            # Wenn alle Knoten im Pfad sind und wir zurück zum Startknoten können
+            if len(path) == len(graph) and path[0] in graph[path[-1]]:
+                return True
+            # Versuche, weitere Knoten hinzuzufügen
+            for neighbor in graph[path[-1]]:
+                if neighbor not in path:
+                    if backtrack(path + [neighbor]):
+                        return True
+            return False
+
+        # Überprüfe für alle Knoten im Graphen
+        for node in graph.nodes():
+            if backtrack([node]):
+                return True
         return False
