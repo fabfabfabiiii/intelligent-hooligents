@@ -16,33 +16,34 @@ def draw_graph(graph, ax, highlight_nodes=None, highlight_edges=None, node_ident
     ax.clear()  # Clear the previous plot
     nx.draw(graph, ax=ax, pos=pos, with_labels=True, labels=labels, node_color=node_colors, edge_color=edge_colors, font_size=10, font_weight='bold')
 
-# Load the graph
-graphFromFile = readGraphFromXml('../resources/Verkehrsnetz.graphml')
+if __name__ == "__main__":
+    # Load the graph
+    graphFromFile = readGraphFromXml('../resources/Verkehrsnetz.graphml')
 
-# Streamlit UI
-st.title("Graph Visualization")
+    # Streamlit UI
+    st.title("Graph Visualization")
 
-# Create a Streamlit placeholder to update the figure dynamically
-plot_area = st.empty()
+    # Create a Streamlit placeholder to update the figure dynamically
+    plot_area = st.empty()
 
-# Create the Matplotlib figure
-plotFig, plotAx = plt.subplots()
+    # Create the Matplotlib figure
+    plotFig, plotAx = plt.subplots()
 
-# Define the steps for node and edge highlights
-steps = [
-    (["0"], []),
-    (["0", "1"], [("0", "1")]),
-    (["0", "1", "7"], [("0", "1"), ("1", "7")]),
-    (["0", "1", "7", "6"], [("0", "1"), ("1", "7"), ("6", "7")]),
-    (["0", "1", "7", "6", "4"], [("0", "1"), ("1", "7"), ("6", "7"), ("4", "6")]),
-]
+    # Define the steps for node and edge highlights
+    steps = [
+        (["0"], []),
+        (["0", "1"], [("0", "1")]),
+        (["0", "1", "7"], [("0", "1"), ("1", "7")]),
+        (["0", "1", "7", "6"], [("0", "1"), ("1", "7"), ("6", "7")]),
+        (["0", "1", "7", "6", "4"], [("0", "1"), ("1", "7"), ("6", "7"), ("4", "6")]),
+    ]
 
-# Iterate through each step and update the figure dynamically
-for highlightedNodes, highlightedEdges in steps:
-    draw_graph(graphFromFile, plotAx, highlightedNodes, highlightedEdges, node_identifier="id")
-    plot_area.pyplot(plotFig)  # Update the Streamlit plot
-    plt.pause(0.5)
+    # Iterate through each step and update the figure dynamically
+    for highlightedNodes, highlightedEdges in steps:
+        draw_graph(graphFromFile, plotAx, highlightedNodes, highlightedEdges, node_identifier="id")
+        plot_area.pyplot(plotFig)  # Update the Streamlit plot
+        plt.pause(0.5)
 
-st.write("Graph updates completed.")
+    st.write("Graph updates completed.")
 
 # use "streamlit run <path.to.file>" run this file
