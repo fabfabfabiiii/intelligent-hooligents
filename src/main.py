@@ -59,15 +59,13 @@ def main():
     # Streamlit UI
     st.title("Graph Visualization")
 
-    # Create a Streamlit placeholder to update the figure dynamically
-    plot_area = st.empty()
+    # Show original graph
+    st.subheader("Original Network")
+    orig_fig, orig_ax = plt.subplots()
+    draw_graph(graphFromFile, orig_ax)
+    st.pyplot(orig_fig)
 
-    # Create the Matplotlib figure
-    plotFig, plotAx = plt.subplots()
-
-    draw_graph(graphFromFile, plotAx)
-    plot_area.pyplot(plotFig)  # Update the Streamlit plot
-
+    # Initialize the routes agent
     routesAgent = RoutesAgent(Model(), "10", "Stadion")
 
     # Get lists of subgraphs from division methods
@@ -75,26 +73,42 @@ def main():
     spanningTreeSubGraphList = routesAgent._divide_by_spanning_tree(streckennetz, 2)
     geometricSubGraphList = routesAgent._divide_by_geometry(streckennetz, 2)
 
-    # Plot each subgraph in the random partition list
-    for i, subgraph in enumerate(randomSubGraphList):
-        fig, ax = plt.subplots()
-        draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
-        ax.set_title(f"Random Partition Subgraph {i + 1}")
-        plot_area.pyplot(fig)
+    # Create separate sections for each partition type
+    st.subheader("Random Partitioning")
+    if randomSubGraphList:
+        random_cols = st.columns(len(randomSubGraphList))
+        for i, subgraph in enumerate(randomSubGraphList):
+            with random_cols[i]:
+                fig, ax = plt.subplots()
+                draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
+                ax.set_title(f"Random Partition {i + 1}")
+                st.pyplot(fig)
+    else:
+        st.write("No random partitions generated")
 
-    # Plot each subgraph in the spanning tree partition list
-    for i, subgraph in enumerate(spanningTreeSubGraphList):
-        fig, ax = plt.subplots()
-        draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
-        ax.set_title(f"Spanning Tree Partition Subgraph {i + 1}")
-        plot_area.pyplot(fig)
+    st.subheader("Spanning Tree Partitioning")
+    if spanningTreeSubGraphList:
+        spanning_cols = st.columns(len(spanningTreeSubGraphList))
+        for i, subgraph in enumerate(spanningTreeSubGraphList):
+            with spanning_cols[i]:
+                fig, ax = plt.subplots()
+                draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
+                ax.set_title(f"Spanning Tree Partition {i + 1}")
+                st.pyplot(fig)
+    else:
+        st.write("No spanning tree partitions generated")
 
-    # Plot each subgraph in the geometric partition list
-    for i, subgraph in enumerate(geometricSubGraphList):
-        fig, ax = plt.subplots()
-        draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
-        ax.set_title(f"Geometric Partition Subgraph {i + 1}")
-        plot_area.pyplot(fig)
+    st.subheader("Geometric Partitioning")
+    if geometricSubGraphList:
+        geo_cols = st.columns(len(geometricSubGraphList))
+        for i, subgraph in enumerate(geometricSubGraphList):
+            with geo_cols[i]:
+                fig, ax = plt.subplots()
+                draw_graph_on_ax(subgraph.convert_to_networkx(), ax)
+                ax.set_title(f"Geometric Partition {i + 1}")
+                st.pyplot(fig)
+    else:
+        st.write("No geometric partitions generated")
 
 if __name__ == '__main__':
     main()
