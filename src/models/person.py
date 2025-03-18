@@ -4,8 +4,8 @@ class Person:
     _id_counter: int = 0
 
     def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10, current_position: str = 'Stadion'):
-        self.id = type(self)._id_counter
-        type(self)._id_counter += 1
+        self.id = Person._id_counter
+        Person._id_counter += 1
 
         self.zielstation: str = zielstation
         self.current_position: str = current_position
