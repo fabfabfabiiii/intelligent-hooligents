@@ -1,7 +1,12 @@
 from src.models.verein import Verein
 
 class Person:
+    _id_counter: int = 0
+
     def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10, current_position: str = 'Stadion'):
+        self.id = type(self)._id_counter
+        type(self)._id_counter += 1
+
         self.zielstation: str = zielstation
         self.current_position: str = current_position
 
@@ -15,7 +20,7 @@ class Person:
         self.zufriedenheit.append(zufriedenheit)
 
     def __str__(self):
-        return f'Ziel: {self.zielstation}, Verein: {self.verein}'
+        return f'Id: {self.id}, Location: {self.current_position}, Ziel: {self.zielstation}, Verein: {self.verein}'
 
     def get_current_zufriedenheit(self) -> int:
         return self.zufriedenheit[-1]
