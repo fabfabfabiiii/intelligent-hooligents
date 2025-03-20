@@ -4,8 +4,6 @@ import os
 
 from mesa import Model
 
-from src.models.visualization import draw_graph_on_ax
-
 # Add the project root to Python's path - das muss man machen weil python eine spielzeug sprache ist
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)  # Go up one level from src/
@@ -16,15 +14,12 @@ from src import config
 from src.models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
 from src.models.streckennetz import Streckennetz
 from src.models.routes_agent import RoutesAgent
+from src.models.visualization import draw_graph_on_ax
 
 # Add notebooks directory to path - relative pfade angeben können wär auch wirklich zu viel verlangt
 notebooks_dir = os.path.join(project_root, 'notebooks')
 sys.path.append(notebooks_dir)
 from notebooks.Read_Graph import readGraphFromXml
-from notebooks.Visualize_Graph import draw_graph
-
-from notebooks.Read_Graph import readGraphFromXml
-from notebooks.Visualize_Graph import draw_graph
 
 # only for testing purposes
 import streamlit as st
@@ -53,8 +48,10 @@ def load_config():
 # for testing route divisions
 def main():
     # Load the graph
-    graphFromFile = readGraphFromXml('./resources/20250309_Verkehrsnetz.graphml')
-    streckennetz = Streckennetz.from_nx_graph(graphFromFile)
+    # graphFromFile = readGraphFromXml('./liverpool.graphml')
+    # streckennetz = Streckennetz.from_nx_graph(graphFromFile)
+
+    streckennetz = Streckennetz.generate_random(50, 10000)
 
     # Streamlit UI
     st.title("Graph Visualization")
@@ -62,11 +59,12 @@ def main():
     # Show original graph
     st.subheader("Original Network")
     orig_fig, orig_ax = plt.subplots()
-    draw_graph(graphFromFile, orig_ax)
+    # draw_graph(graphFromFile, orig_ax)
+    draw_graph_on_ax(streckennetz, orig_ax)
     st.pyplot(orig_fig)
 
     # Initialize the routes agent
-    routesAgent = RoutesAgent(Model(), "10", "Stadion")
+    routesAgent = RoutesAgent(Model(), "n0", "n10")
 
     # Get lists of subgraphs from division methods
     randomSubGraphList = routesAgent._divide_by_random_partitioning(streckennetz, 2)

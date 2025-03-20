@@ -48,7 +48,7 @@ def draw_graph(graph: Streckennetz | Graph, highlight_nodes: list[str] | None = 
     plt.show()
 
 def draw_graph_on_ax(graph: Streckennetz | Graph,
-               ax: plt.axes,
+               ax: plt.Axes | None = None,
                highlight_nodes: list[str] | None = None,
                highlight_edges: list[tuple[str, str]] | None = None,
                show_distances: bool = False) -> None:
