@@ -1,5 +1,7 @@
-import networkx as nx
+import itertools
+import random
 import math
+import networkx as nx
 from networkx import Graph
 
 class Streckennetz:
@@ -121,3 +123,27 @@ class Streckennetz:
             netz.add_edge(start, end, distance)
 
         return netz
+
+    @staticmethod
+    def create_graph(num_nodes: int, edge_probability: float = 1.0, length: int = 100, height: int = 100) -> "Streckennetz":
+        graph: Streckennetz = Streckennetz()
+        node_names: list[str] = []
+
+        for n in range(num_nodes):
+            x = random.randint(0, length)
+            y = random.randint(0, height)
+
+            node_names.append(graph.add_node(f'node_{n+1}', (x, y)))
+
+        for start, end in itertools.combinations(node_names, 2):
+            if random.random() >= edge_probability:
+                continue
+
+            start_x, start_y = graph.node_coordinates[start]
+            end_x, end_y = graph.node_coordinates[end]
+
+            distance: int = int(math.sqrt((end_x - start_x) ** 2 + (end_y - start_y) ** 2))
+
+            graph.add_edge(start, end, distance)
+
+        return graph
