@@ -2,9 +2,12 @@ from mesa import Agent, Model
 import networkx as nx
 import random
 import math
-from .streckennetz import Streckennetz
+from models.streckennetz import Streckennetz
 from typing import List, Tuple, Set
 from itertools import combinations
+
+#for performance measurement
+import time
 
 class RoutesAgent(Agent):
     def __init__(self, model, main_station_node_id: str, start_node_id: str):
@@ -28,16 +31,25 @@ class RoutesAgent(Agent):
         if self.main_station not in streckennetz.nodes or self.start_node not in streckennetz.nodes:
             raise ValueError("Main station or start node not found in the network")
 
+        start_time = time.time()
+        print("starting graph division by geometry... ")
         # First try geometric division
         subgraphs = self._divide_by_geometry(streckennetz, subgraph_count)
+        print("finished graph division by geometry... " + str(time.time() - start_time) + "seconds")
 
         # If geometric division fails, try random partitioning
         if not subgraphs:
+            start_time = time.time()
+            print("starting graph division by random partitioning... ")
             subgraphs = self._divide_by_random_partitioning(streckennetz, subgraph_count)
+            print("finished graph division by random partitioning... " + str(time.time() - start_time) + "seconds")
 
         # If random partitioning fails, fallback to spanning tree approach
         if not subgraphs:
+            start_time = time.time()
+            print("starting graph division by spanning tree... ")
             subgraphs = self._divide_by_spanning_tree(streckennetz, subgraph_count)
+            print("finished graph division by spanning tree... " + str(time.time() - start_time) + "seconds")
 
         return subgraphs
 
