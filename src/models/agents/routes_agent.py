@@ -8,6 +8,7 @@ from models.intelligent_hooligents_model import IntelligentHooligentsModel
 
 class RoutesAgent(Agent):
     """An agent that calculates routes for busses"""
+
     def __init__(self, model: IntelligentHooligentsModel, route_calculator: RouteCalculator):
         super().__init__(model)
         self.route_calculator = route_calculator
@@ -23,7 +24,8 @@ class RoutesAgent(Agent):
 
     def step(self):
         # find available busses waiting for a route
-        bus_agents = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if isinstance(agent, BusAgent) and not agent.remaining_route]
+        bus_agents = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
+                      isinstance(agent, BusAgent) and not agent.remaining_route]
         if not bus_agents:
             return
         # assign route to the first available bus agent

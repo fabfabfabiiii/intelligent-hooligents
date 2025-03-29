@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from models.agents.bus_agent import BusAgent
 from models.person import Person
 
+
 class PassengerExchangeHandler(ABC):
     """
     Abstract base class for handling passenger exchanges.

@@ -11,7 +11,8 @@ class RouteCalculator(ABC):
     """
 
     @abstractmethod
-    def calculate_route(self, graph: Streckennetz | nx.Graph, start_node: str, mandatory_nodes: list[str] | None) -> list[str]:
+    def calculate_route(self, graph: Streckennetz | nx.Graph, start_node: str, mandatory_nodes: list[str] | None) -> \
+    list[str]:
         """
         Calculate a route through the graph.
 

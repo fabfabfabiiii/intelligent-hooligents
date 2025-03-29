@@ -6,11 +6,12 @@ from models.person import Person
 
 
 class BusAgent(mesa.Agent):
-    def __init__(self, model: "IntelligentHooligentsModel", capacity: int, passenger_exchange_handler: PassengerExchangeHandler):
+    def __init__(self, model: "IntelligentHooligentsModel", capacity: int,
+                 passenger_exchange_handler: PassengerExchangeHandler):
         super().__init__(model)
         self.capacity = capacity
-        self.remaining_route : list[str] = []
-        self.passengers : list[Person] = []
+        self.remaining_route: list[str] = []
+        self.passengers: list[Person] = []
         self.passenger_exchange_handler = passenger_exchange_handler
 
         # Movement tracking
