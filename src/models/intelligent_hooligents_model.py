@@ -12,7 +12,7 @@ from models.streckennetz import Streckennetz
 class IntelligentHooligentsModel(mesa.Model):
     """Intelligent hooligents model."""
 
-    def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: int, route_calculator: RouteCalculator,
+    def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: str, route_calculator: RouteCalculator,
                  passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler,
                  num_busses: int = 1, num_people: int = 100):
         super().__init__()
@@ -21,10 +21,12 @@ class IntelligentHooligentsModel(mesa.Model):
             agent = BusAgent(self, capacity=10, passenger_exchange_handler=passenger_exchange_handler,
                              person_handler=person_handler)  # todo make capacity configurable
             self.agents.add(agent)
-            self.grid.place_agent(agent, stadium_node_id)
+            # noinspection PyTypeChecker
+            self.grid.place_agent(agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
         routes_agent = RoutesAgent(self, route_calculator)
         self.agents.add(routes_agent)
-        self.grid.place_agent(routes_agent, stadium_node_id)
+        # noinspection PyTypeChecker
+        self.grid.place_agent(routes_agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
         # self.people: list[Person] = []
 
     def step(self):
