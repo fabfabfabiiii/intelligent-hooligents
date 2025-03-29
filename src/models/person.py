@@ -1,4 +1,4 @@
-from src.models.verein import Verein
+from models.verein import Verein
 
 class Person:
     _id_counter: int = 0

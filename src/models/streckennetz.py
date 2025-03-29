@@ -4,6 +4,7 @@ import math
 import networkx as nx
 from networkx import Graph
 
+
 class Streckennetz:
     def __init__(self):
         self.num_nodes: int = 0
@@ -27,13 +28,13 @@ class Streckennetz:
                 subgraph.add_node(node, self.node_coordinates[node])
 
         for (u, v) in self.edges:
-            #filters, if edge can't exist anymore
+            # filters, if edge can't exist anymore
             subgraph.add_edge(u, v, self.edge_distances[(u, v)])
 
         return subgraph
 
-    #return name of node, if name is created
-    #return None, if node with this name already exists
+    # return name of node, if name is created
+    # return None, if node with this name already exists
     def add_node(self, node: str, coordinate: tuple[int, int]) -> None | str:
         if node in self.nodes:
             return None
@@ -45,8 +46,8 @@ class Streckennetz:
 
         return node
 
-    #return None, if node can't be created (exists already or one of the nodes not exists
-    def add_edge(self, start: str, end:str, distance: int) -> None | tuple[str, str]:
+    # return None, if node can't be created (exists already or one of the nodes not exists
+    def add_edge(self, start: str, end: str, distance: int) -> None | tuple[str, str]:
         if start not in self.nodes or end not in self.nodes:
             return None
 
@@ -64,15 +65,15 @@ class Streckennetz:
             g.add_node(node, pos=(int(x), int(y)))
 
         for u, v in self.edges:
-            g.add_edge(u,v, weight=self.edge_distances[(u, v)])
+            g.add_edge(u, v, weight=self.edge_distances[(u, v)])
 
         return g
 
     def is_network(self) -> bool:
         return self._is_hamiltonian_cycle()
 
-    #danke, ChatGPT
-    #eventuell nur eine Übergangslösung, aber scheint zu funktionieren
+    # danke, ChatGPT
+    # eventuell nur eine Übergangslösung, aber scheint zu funktionieren
     def _is_hamiltonian_cycle(self) -> bool:
         graph: Graph = self.convert_to_networkx()
 
@@ -97,7 +98,8 @@ class Streckennetz:
     @staticmethod
     def from_nx_graph(graph: nx.Graph, coordinates_from_positions: bool = False) -> "Streckennetz":
         nodes: list[str] = [data["label"] for _, data in graph.nodes(data=True)]
-        node_coordinates: dict[str, tuple[int, int]] = {data["label"]: data["pos"] for _, data in graph.nodes(data=True)}
+        node_coordinates: dict[str, tuple[int, int]] = {data["label"]: data["pos"] for _, data in
+                                                        graph.nodes(data=True)}
         edges: list[tuple[str, str]] = [(graph.nodes[u]["label"], graph.nodes[v]["label"]) for u, v in graph.edges]
         edge_distances: dict[tuple[str, str], int] = {
             (graph.nodes[node1]["label"], graph.nodes[node2]["label"]): int(data["weight"])
@@ -125,15 +127,16 @@ class Streckennetz:
         return netz
 
     @staticmethod
-    def create_graph(num_nodes: int, edge_probability: float = 1.0, length: int = 100, height: int = 100) -> "Streckennetz":
+    def create_graph(num_nodes: int, edge_probability: float = 1.0, width: int = 100,
+                     height: int = 100) -> "Streckennetz":
         graph: Streckennetz = Streckennetz()
         node_names: list[str] = []
 
         for n in range(num_nodes):
-            x = random.randint(0, length)
+            x = random.randint(0, width)
             y = random.randint(0, height)
 
-            node_names.append(graph.add_node(f'node_{n+1}', (x, y)))
+            node_names.append(graph.add_node(f'node_{n + 1}', (x, y)))
 
         for start, end in itertools.combinations(node_names, 2):
             if random.random() >= edge_probability:

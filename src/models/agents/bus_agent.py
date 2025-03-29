@@ -1,18 +1,19 @@
 import mesa
 
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
-from models.intelligent_hooligents_model import IntelligentHooligentsModel
-from models.person import Person
+# from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
+from models.person import Person, PersonHandler
 
 
 class BusAgent(mesa.Agent):
-    def __init__(self, model: "IntelligentHooligentsModel", capacity: int,
-                 passenger_exchange_handler: PassengerExchangeHandler):
+    def __init__(self, model, capacity: int,
+                 passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler):
         super().__init__(model)
         self.capacity = capacity
         self.remaining_route: list[str] = []
         self.passengers: list[Person] = []
         self.passenger_exchange_handler = passenger_exchange_handler
+        self.person_handler = person_handler
 
         # Movement tracking
         self.current_edge_length: int | None = None
@@ -47,7 +48,8 @@ class BusAgent(mesa.Agent):
             self.model.grid.move_agent(self, self.remaining_route.pop(0))
 
     def _handle_node_actions(self):
-        alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(self)
+        alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(
+            self.remaining_route, self.capacity, self.passengers, self.person_handler.get_persons_at_location(self.pos))
         if alighting_passengers:
             for passenger in alighting_passengers:
                 self.passengers.remove(passenger)
@@ -58,4 +60,3 @@ class BusAgent(mesa.Agent):
                 else:
                     # Handle the case where the bus is full
                     raise Exception("Bus is full, cannot board more passengers.")
-        pass

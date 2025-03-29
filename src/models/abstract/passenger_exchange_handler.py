@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-
-from models.agents.bus_agent import BusAgent
 from models.person import Person
 
 
@@ -11,11 +9,15 @@ class PassengerExchangeHandler(ABC):
     """
 
     @abstractmethod
-    def handle_passenger_exchange(self, bus: BusAgent) -> tuple[list[Person], list[Person]]:
+    def handle_passenger_exchange(self, remaining_stops: list[str], bus_capacity: int, current_passengers: list[Person],
+                                  people_at_station: list[Person]) -> tuple[list[Person], list[Person]]:
         """
         Handle the passenger exchange at the bus's current node.
 
-        :param bus: The bus agent at the current node.
+        :param remaining_stops: List of remaining stops for the bus.
+        :param bus_capacity: The capacity of the bus.
+        :param current_passengers: List of current passengers on the bus.
+        :param people_at_station: List of people waiting at the station.
         :return: A tuple containing two lists:
             - List of passengers to get off the bus.
             - List of passengers to get on the bus.

@@ -3,13 +3,15 @@ from mesa import Agent
 from models.abstract import route_calculator
 from models.abstract.route_calculator import RouteCalculator
 from models.agents.bus_agent import BusAgent
-from models.intelligent_hooligents_model import IntelligentHooligentsModel
+
+
+# from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
 
 
 class RoutesAgent(Agent):
     """An agent that calculates routes for busses"""
 
-    def __init__(self, model: IntelligentHooligentsModel, route_calculator: RouteCalculator):
+    def __init__(self, model, route_calculator: RouteCalculator):
         super().__init__(model)
         self.route_calculator = route_calculator
 
