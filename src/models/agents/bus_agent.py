@@ -7,13 +7,14 @@ from models.person import Person, PersonHandler
 
 class BusAgent(mesa.Agent):
     def __init__(self, model, capacity: int,
-                 passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler):
+                 passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler, speed: int = 10):
         super().__init__(model)
         self.capacity = capacity
         self.remaining_route: list[str] = []
         self.passengers: list[Person] = []
         self.passenger_exchange_handler = passenger_exchange_handler
         self.person_handler = person_handler
+        self.speed = speed
 
         # Movement tracking
         self.current_edge_length: int | None = None
@@ -38,7 +39,7 @@ class BusAgent(mesa.Agent):
             return  # End the step after handling node actions
 
         # Move along the edge
-        self.current_edge_progress += 1
+        self.current_edge_progress += self.speed
 
         # Check if we have reached the end of the edge
         if self.current_edge_progress >= self.current_edge_length:

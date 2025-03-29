@@ -14,10 +14,10 @@ from models.verein import Verein
 # Dummy implementations for route calculator and passenger exchange handler
 # TODO: Replace with actual implementations
 class DummyRouteCalculator(RouteCalculator):
-    def calculate_route(self, graph, start_node, end_node):
+    def calculate_route(self, graph, start_node, mandatory_nodes):
         # Simple implementation to return a path between two nodes
         try:
-            path = nx.shortest_path(graph, start_node, end_node)
+            path = [edge[1] for edge in nx.find_cycle(graph, start_node)]
             return path
         except nx.NetworkXNoPath:
             return []
@@ -57,7 +57,8 @@ def create_model(graph_params, model_params):
         passenger_exchange_handler=passenger_exchange_handler,
         person_handler=PersonHandler(dict[tuple[str, Verein], int]()),  # TODO: people initialization
         num_busses=model_params["num_busses"],
-        num_people=model_params["num_people"]
+        num_people=model_params["num_people"],
+        bus_speed=model_params["bus_speed"],
     )
 
     return model, streckennetz
@@ -106,7 +107,7 @@ def main():
     st.sidebar.header("Streckennetz Parameters")
     graph_params = {
         "num_nodes": st.sidebar.slider("Number of Nodes", 5, 50, 10),
-        "edge_probability": st.sidebar.slider("Edge probability", 0, 100, 10),
+        "edge_probability": st.sidebar.slider("Edge probability", 0, 100, 50),
         "width": st.sidebar.slider("Graph width", 10, 1000, 100),
         "height": st.sidebar.slider("Graph height", 10, 1000, 100)
     }
@@ -115,7 +116,8 @@ def main():
     model_params = {
         "num_busses": st.sidebar.slider("Number of Buses", 1, 20, 3),
         "num_people": st.sidebar.slider("Number of People", 10, 500, 100),
-        "bus_capacity": st.sidebar.slider("Bus Capacity", 5, 100, 10)
+        "bus_capacity": st.sidebar.slider("Bus Capacity", 5, 100, 10),
+        "bus_speed": st.sidebar.slider("Bus Speed", 1, 100, 20)
     }
 
     # Initialize or regenerate the model
@@ -140,7 +142,7 @@ def main():
         if st.button("Step"):
             st.session_state.model.step()
             st.session_state.step_count += 1
-            st.experimental_rerun()
+            st.rerun()
 
     with col2:
         st.write(f"Current Step: {st.session_state.step_count}")
@@ -156,7 +158,7 @@ def main():
                                show_agents, show_routes)
         st.pyplot(plot)
         time.sleep(interval)
-        st.experimental_rerun()
+        st.rerun()
 
 
 if __name__ == "__main__":
