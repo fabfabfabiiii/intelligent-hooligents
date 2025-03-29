@@ -36,17 +36,12 @@ class TspOptimizer:
 
     def _prepare_optimization_shortest_route(self) -> None:
         # constraint : leave and enter each node only once
-        #num_nodes: int = len(self.graph.nodes)
         for n in self.graph.nodes:
             self.model.add_linear_constraint(
                 poi.quicksum(self.decision_variable_edges[n, v] for v in self.graph.nodes if (n, v) in self.graph.edges) +
                 poi.quicksum(self.decision_variable_edges[v, n] for v in self.graph.nodes if (v, n) in self.graph.edges) , poi.Eq, 2)
 
             self.log.append('Add Linear Constraint')
-
-        obj = poi.quicksum(self.graph.edge_distances[e] * self.decision_variable_edges[e] for e in self.graph.edges)
-        self.model.set_objective(obj, poi.ObjectiveSense.Minimize)
-        self.log.append("Minimize Route length")
 
     def _prepare_optimization_shortest_subroute(self, nodes: list[str]) -> None:
         #Decision variable nodes
@@ -79,6 +74,10 @@ class TspOptimizer:
         # Decision variable edges
         self.decision_variable_edges = self.model.add_variables(self.graph.edges, domain=poi.VariableDomain.Binary)
         self.log.append("Add Decision Variables Edges")
+
+        obj = poi.quicksum(self.graph.edge_distances[e] * self.decision_variable_edges[e] for e in self.graph.edges)
+        self.model.set_objective(obj, poi.ObjectiveSense.Minimize)
+        self.log.append("Minimize Route length")
 
         if goal == TSPOptimizationGoal.SHORTEST_ROUTE:
             self._prepare_optimization_shortest_route()
@@ -143,50 +142,6 @@ class TspOptimizer:
         self.log.append(f'Finish optimization for {self.goal}')
         self.is_optimized = True
         return True
-
-    def _get_result_shortest_route(self) -> tuple[int, list[str], Streckennetz]:
-        length: int = 0
-        graph: Streckennetz = Streckennetz()
-
-        for node in self.graph.nodes:
-            graph.add_node(node, self.graph.node_coordinates[node])
-
-        edges_used = [e for e in self.decision_variable_edges if self.model.get_variable_attribute(
-            self.decision_variable_edges[e], poi.VariableAttribute.Value) > 0.99]
-
-        for e in edges_used:
-            length += self.graph.edge_distances[e]
-            start, end = e
-            graph.add_edge(start, end, self.graph.edge_distances[e])
-
-        #Line from here until end of the function is AI GENERATED
-        # Einen Startknoten finden
-        # 1. Adjazenzliste erstellen
-        adjacency = {}
-        for start, end in edges_used:
-            adjacency.setdefault(start, []).append(end)
-            adjacency.setdefault(end, []).append(start)
-
-        # 2. Einen Startpunkt finden (z. B. einen Knoten mit nur einer Verbindung)
-        start_node = next((node for node in adjacency if len(adjacency[node]) == 1), None)
-        if start_node is None:
-            # Falls kein Startknoten gefunden wird, handelt es sich um einen Zyklus, dann nehmen wir einen beliebigen Knoten
-            start_node = next(iter(adjacency))
-
-        # 3. Pfad rekonstruierten
-        ordered_nodes = [start_node]
-        visited_edges = set()
-
-        while len(ordered_nodes) < len(adjacency):
-            current = ordered_nodes[-1]
-            for neighbor in adjacency[current]:
-                edge = tuple(sorted((current, neighbor)))  # Sorgt dafür, dass (a, b) und (b, a) gleich behandelt werden
-                if edge not in visited_edges:
-                    visited_edges.add(edge)
-                    ordered_nodes.append(neighbor)
-                    break
-
-        return length, ordered_nodes, graph
 
     def get_result(self) -> tuple[int, list[str], Streckennetz] | None:
         if not self.is_optimized or self.goal is None:
