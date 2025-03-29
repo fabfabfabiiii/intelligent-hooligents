@@ -1,21 +1,25 @@
 import mesa
 import networkx as nx
 
-from models.bus_agent import BusAgent
-from models.person import Person
+from models.abstract.route_calculator import RouteCalculator
+from models.agents.bus_agent import BusAgent
+from models.agents.routes_agent import RoutesAgent
 from models.streckennetz import Streckennetz
 
 
 class IntelligentHooligentsModel(mesa.Model):
     """Intelligent hooligents model."""
 
-    def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: int, num_busses: int = 1, num_people: int= 100):
+    def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: int, route_calculator: RouteCalculator, num_busses: int = 1, num_people: int= 100):
         super().__init__()
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
             agent = BusAgent(self, capacity=10) # todo make capacity configurable
             self.agents.add(agent)
             self.grid.place_agent(agent, stadium_node_id)
+        routes_agent = RoutesAgent(self, route_calculator)
+        self.agents.add(routes_agent)
+        self.grid.place_agent(routes_agent, stadium_node_id)
         # self.people: list[Person] = []
 
     def step(self):
