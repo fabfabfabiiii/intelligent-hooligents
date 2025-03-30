@@ -11,11 +11,9 @@ from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.verein import Verein
 
 
-# Dummy implementations for route calculator and passenger exchange handler
 # TODO: Replace with actual implementations
 class DummyRouteCalculator(RouteCalculator):
     def calculate_route(self, graph, start_node, mandatory_nodes):
-        # Simple implementation to return a path between two nodes
         try:
             path = [edge[1] for edge in nx.find_cycle(graph, start_node)]
             return path
@@ -29,8 +27,6 @@ class DummyPassengerExchangeHandler(PassengerExchangeHandler):
         # TODO: Implement proper passenger exchange logic
         return [], []
 
-
-# TODO: Implement PersonHandler class which is required by BusAgent
 
 def create_model(graph_params, model_params):
     # Create Streckennetz
