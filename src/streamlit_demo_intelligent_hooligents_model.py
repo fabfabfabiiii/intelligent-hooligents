@@ -1,7 +1,9 @@
 import streamlit as st
 import networkx as nx
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import time
+import numpy as np
+from collections import defaultdict
 
 from models.person import PersonHandler
 from models.streckennetz import Streckennetz
@@ -42,7 +44,6 @@ def create_model(graph_params, model_params):
     route_calculator = DummyRouteCalculator()
     passenger_exchange_handler = DummyPassengerExchangeHandler()
 
-    # Stadium node is the first node for simplicity
     stadium_node_id = "node_1"  # todo make this configurable
 
     # Create model
@@ -60,45 +61,193 @@ def create_model(graph_params, model_params):
     return model, streckennetz
 
 
-def visualize_model(model, streckennetz, show_agents=True, show_routes=True):
+def generate_color_map(agent_ids):
+    """Generate a consistent color map for agents based on their unique IDs"""
+    if 'agent_colors' not in st.session_state:
+        # Define a colorful palette
+        colors = [
+            '#e6194B', '#3cb44b', '#4363d8', '#f58231', '#911eb4',
+            '#42d4f4', '#f032e6', '#bfef45', '#fabed4', '#469990',
+            '#dcbeff', '#9A6324', '#fffac8', '#800000', '#aaffc3'
+        ]
+        # Ensure we have enough colors by cycling if necessary
+        color_map = {}
+        for i, agent_id in enumerate(agent_ids):
+            color_map[agent_id] = colors[i % len(colors)]
+        st.session_state.agent_colors = color_map
+    return st.session_state.agent_colors
+
+
+def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=True):
     G = model.grid.G
     pos = nx.spring_layout(G, seed=42)  # For consistent layout
 
-    plt.figure(figsize=(10, 8))
+    # Prepare node data
+    node_x = []
+    node_y = []
+    node_text = []
 
-    # Draw the network
-    nx.draw_networkx_nodes(G, pos, node_size=300, node_color='lightblue')
-    nx.draw_networkx_edges(G, pos, width=1, alpha=0.5)
-    nx.draw_networkx_labels(G, pos)
+    for node in G.nodes():
+        x, y = pos[node]
+        node_x.append(x)
+        node_y.append(y)
 
-    # Draw edge weights
-    edge_labels = {(u, v): d['weight'] for u, v, d in G.edges(data=True)}
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
+        # Create node hover text
+        agents_at_node = model.grid.get_cell_list_contents([node])
+        agent_info = ""
+        if agents_at_node:
+            agent_info = "<br>Agents at this node:<br>"
+            for agent in agents_at_node:
+                agent_type = type(agent).__name__
+                agent_info += f"- {agent_type} (ID: {agent.unique_id})<br>"
+        node_text.append(f"Node: {node}{agent_info}")
 
-    # Draw agents if enabled
+    # Create node trace
+    node_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='markers',
+        hoverinfo='text',
+        text=node_text,
+        marker=dict(
+            showscale=False,
+            color='lightblue',
+            size=20,
+            line=dict(width=1, color='black')
+        ),
+        name="Nodes"
+    )
+
+    # Prepare edge data
+    edge_x = []
+    edge_y = []
+    edge_text = []
+
+    for edge in G.edges(data=True):
+        x0, y0 = pos[edge[0]]
+        x1, y1 = pos[edge[1]]
+        edge_x.extend([x0, x1, None])
+        edge_y.extend([y0, y1, None])
+
+        # Add edge weight to hover text
+        weight = edge[2].get('weight', 1)
+        edge_text.append(f"Edge: {edge[0]} → {edge[1]}<br>Weight: {weight}")
+
+    # Create edge trace
+    edge_trace = go.Scatter(
+        x=edge_x, y=edge_y,
+        line=dict(width=1, color='#888'),
+        hoverinfo='text',
+        text=edge_text,
+        mode='lines',
+        name="Edges"
+    )
+
+    # Create agent traces if enabled
+    agent_traces = []
     if show_agents:
-        bus_positions = []
-        # TODO: Update to show current position including edge progress
+        # Group agents by node
+        agents_by_node = defaultdict(list)
         for agent in model.agents:
             if hasattr(agent, 'pos'):
-                bus_positions.append(agent.pos)
+                agents_by_node[agent.pos].append(agent)
 
-        if bus_positions:
-            nx.draw_networkx_nodes(G, pos, nodelist=bus_positions,
-                                   node_color='red', node_size=200)
+        # Generate color map for agents
+        agent_ids = [agent.unique_id for agent in model.agents if hasattr(agent, 'pos')]
+        color_map = generate_color_map(agent_ids)
 
-    # Draw routes if enabled
+        # Create agent traces
+        for node, agents in agents_by_node.items():
+            if node in pos:
+                # Calculate positions for multiple agents at the same node
+                center_x, center_y = pos[node]
+                radius = 0.03
+
+                for i, agent in enumerate(agents):
+                    # Position agents in a circle around the node
+                    angle = (2 * np.pi * i) / max(1, len(agents))
+                    offset_x = radius * np.cos(angle)
+                    offset_y = radius * np.sin(angle)
+
+                    agent_color = color_map.get(agent.unique_id, 'red')
+                    agent_type = type(agent).__name__
+
+                    agent_trace = go.Scatter(
+                        x=[center_x + offset_x],
+                        y=[center_y + offset_y],
+                        mode='markers',
+                        marker=dict(
+                            color=agent_color,
+                            size=15,
+                            symbol='circle',
+                            line=dict(width=1, color='black')
+                        ),
+                        name=f"{agent_type} {agent.unique_id}",
+                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}",
+                        hoverinfo='text'
+                    )
+                    agent_traces.append(agent_trace)
+
+    # Create route traces if enabled
+    route_traces = []
     if show_routes:
-        # TODO: Visualize planned routes for each bus
+        # TODO: Implement route visualization when route data is available
         pass
 
-    plt.title("Intelligent Hooligents Model Visualization")
-    plt.axis('off')
-    return plt
+    # Create figure
+    fig = go.Figure(
+        data=[edge_trace, node_trace] + agent_traces + route_traces,
+        layout=go.Layout(
+            title="Intelligent Hooligents Model Visualization",
+            titlefont=dict(size=16),
+            showlegend=True,
+            hovermode='closest',
+            margin=dict(b=20, l=5, r=5, t=40),
+            xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            yaxis=dict(showgrid=False, zeroline=False, showticklabels=False),
+            height=600,
+            legend=dict(
+                yanchor="top",
+                y=0.99,
+                xanchor="right",
+                x=0.99
+            )
+        )
+    )
+
+    # Apply saved camera/viewport state if available
+    if 'viewport_state' in st.session_state:
+        fig.update_layout(
+            xaxis=dict(
+                range=st.session_state.viewport_state['xaxis.range'],
+                showgrid=False, zeroline=False, showticklabels=False
+            ),
+            yaxis=dict(
+                range=st.session_state.viewport_state['yaxis.range'],
+                showgrid=False, zeroline=False, showticklabels=False
+            )
+        )
+
+    return fig
+
+
+def _step_callback():
+    # Save the current state of the model to session state
+    # st.session_state.viewport_state = {
+    #     'xaxis.range': [st.session_state.xaxis_range[0], st.session_state.xaxis_range[1]],
+    #     'yaxis.range': [st.session_state.yaxis_range[0], st.session_state.yaxis_range[1]]
+    # }
+    # Step the model
+    st.session_state.model.step()
+    st.session_state.step_count += 1
+    st.rerun()
 
 
 def main():
-    st.title("Intelligent Hooligents Model Simulation")
+    st.set_page_config(
+        page_title="Intelligent Hooligents Model Simulation",
+        layout="centered",
+        initial_sidebar_state="expanded"
+    )
 
     st.sidebar.header("Streckennetz Parameters")
     graph_params = {
@@ -121,24 +270,24 @@ def main():
         with st.spinner("Generating model..."):
             st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params)
             st.session_state.step_count = 0
+            if 'agent_colors' in st.session_state:
+                del st.session_state.agent_colors  # Reset colors when regenerating model
 
     # Display visualization options
     st.sidebar.header("Visualization Options")
     show_agents = st.sidebar.checkbox("Show Agents", True)
     show_routes = st.sidebar.checkbox("Show Routes", True)
 
-    # Create plot
-    plot = visualize_model(st.session_state.model, st.session_state.streckennetz,
-                           show_agents, show_routes)
-    st.pyplot(plot)
+    # Create plot with Plotly
+    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz,
+                                 show_agents, show_routes)
+    st.plotly_chart(fig, use_container_width=True)
 
     # Step controls
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Step"):
-            st.session_state.model.step()
-            st.session_state.step_count += 1
-            st.rerun()
+            _step_callback()
 
     with col2:
         st.write(f"Current Step: {st.session_state.step_count}")
@@ -148,13 +297,8 @@ def main():
     interval = st.slider("Step Interval (seconds)", 0.1, 5.0, 1.0)
 
     if auto_play:
-        st.session_state.model.step()
-        st.session_state.step_count += 1
-        plot = visualize_model(st.session_state.model, st.session_state.streckennetz,
-                               show_agents, show_routes)
-        st.pyplot(plot)
         time.sleep(interval)
-        st.rerun()
+        _step_callback()
 
 
 if __name__ == "__main__":
