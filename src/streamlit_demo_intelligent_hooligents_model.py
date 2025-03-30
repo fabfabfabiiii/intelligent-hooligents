@@ -5,6 +5,7 @@ import time
 import numpy as np
 from collections import defaultdict
 
+from models.agents.bus_agent import BusAgent
 from models.person import PersonHandler
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
@@ -161,27 +162,44 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
     # Prepare edge data
     edge_x = []
     edge_y = []
-    edge_text = []
+
+    # Create a separate trace for each edge with its weight
+    edge_traces = []
 
     for edge in G.edges(data=True):
         x0, y0 = pos[edge[0]]
         x1, y1 = pos[edge[1]]
-        edge_x.extend([x0, x1, None])
-        edge_y.extend([y0, y1, None])
 
-        # Add edge weight to hover text
+        # Line for the edge
+        edge_trace = go.Scatter(
+            x=[x0, x1],
+            y=[y0, y1],
+            mode='lines',
+            line=dict(width=1, color='#888'),
+            hoverinfo='none',
+            showlegend=False
+        )
+        edge_traces.append(edge_trace)
+
+        # Weight label in the middle of the edge
         weight = edge[2].get('weight', 1)
-        edge_text.append(f"Edge: {edge[0]} → {edge[1]}<br>Weight: {weight}")
+        mid_x = (x0 + x1) / 2
+        mid_y = (y0 + y1) / 2
 
-    # Create edge trace
-    edge_trace = go.Scatter(
-        x=edge_x, y=edge_y,
-        line=dict(width=1, color='#888'),
-        hoverinfo='text',
-        text=edge_text,
-        mode='lines',
-        name="Edges"
-    )
+        weight_trace = go.Scatter(
+            x=[mid_x],
+            y=[mid_y],
+            mode='text',
+            text=[str(weight)],
+            textposition="middle center",
+            textfont=dict(
+                size=9,
+                color='white',
+            ),
+            hoverinfo='none',
+            showlegend=False
+        )
+        edge_traces.append(weight_trace)
 
     # Create agent traces if enabled
     agent_traces = []
@@ -231,12 +249,50 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
     # Create route traces if enabled
     route_traces = []
     if show_routes:
-        # TODO: Implement route visualization when route data is available
-        pass
+        # Get all bus agents from the model
+        bus_agents = [agent for agent in model.agents if type(agent).__name__ == BusAgent.__name__]
+
+        # Get the color map for agents
+        agent_ids = [agent.unique_id for agent in model.agents if hasattr(agent, 'pos')]
+        color_map = generate_color_map(agent_ids)
+
+        # Create a trace for each bus's route
+        for bus in bus_agents:
+            if hasattr(bus, 'remaining_route') and bus.remaining_route:
+                # Create a complete route that includes current position and remaining route
+                complete_route = [bus.pos] + bus.remaining_route
+
+                # Create a line for each segment of the route
+                for i in range(len(complete_route) - 1):
+                    start_node = complete_route[i]
+                    end_node = complete_route[i + 1]
+
+                    # Get positions of the nodes
+                    if start_node in pos and end_node in pos:
+                        x0, y0 = pos[start_node]
+                        x1, y1 = pos[end_node]
+
+                        # Get the bus color from the color map
+                        bus_color = color_map.get(bus.unique_id, 'red')
+
+                        # Create a trace for this route segment
+                        route_segment = go.Scatter(
+                            x=[x0, x1],
+                            y=[y0, y1],
+                            mode='lines',
+                            line=dict(width=3, color=bus_color),
+                            opacity=0.7,
+                            hoverinfo='text',
+                            text=f"Bus {bus.unique_id} route segment: {start_node} to {end_node}",
+                            name=f"Bus {bus.unique_id} Route",
+                            showlegend=(i == 0)  # Only show in legend once per bus
+                        )
+                        route_traces.append(route_segment)
 
     # Create figure
     fig = go.Figure(
-        data=[edge_trace, node_trace, node_label_trace] + agent_traces + route_traces,
+        # data=[node_trace, node_label_trace] + edge_traces + agent_traces + route_traces,
+        data=edge_traces + route_traces + [node_trace, node_label_trace] + agent_traces,
         layout=go.Layout(
             title="Intelligent Hooligents Model Visualization",
             titlefont=dict(size=16),
