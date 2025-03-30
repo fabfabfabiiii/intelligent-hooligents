@@ -23,6 +23,31 @@ class DummyRouteCalculator(RouteCalculator):
             return []
 
 
+class DummyRandomRouteCalculator(RouteCalculator):
+    def calculate_route(self, graph, start_node, mandatory_nodes):
+        try:
+            # Find all simple cycles in the graph
+            all_cycles = list(nx.simple_cycles(graph))
+
+            # Filter cycles that contain the start_node
+            valid_cycles = [cycle for cycle in all_cycles if start_node in cycle]
+
+            if not valid_cycles:
+                return []
+
+            # Randomly select one of the valid cycles
+            import random
+            selected_cycle = random.choice(valid_cycles)
+
+            # Rotate the cycle so that it starts with the node after start_node and ends with the start_node
+            start_index = selected_cycle.index(start_node) + 1
+            rotated_cycle = selected_cycle[start_index:] + selected_cycle[:start_index]
+
+            return rotated_cycle
+        except nx.NetworkXNoCycle:
+            return []
+
+
 class DummyPassengerExchangeHandler(PassengerExchangeHandler):
     def handle_passenger_exchange(self, remaining_stops, bus_capacity, current_passengers, people_at_station):
         # Dummy implementation
@@ -41,7 +66,7 @@ def create_model(graph_params, model_params):
 
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
-    route_calculator = DummyRouteCalculator()
+    route_calculator = DummyRandomRouteCalculator()
     passenger_exchange_handler = DummyPassengerExchangeHandler()
 
     stadium_node_id = "node_1"  # todo make this configurable
@@ -86,11 +111,13 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
     node_x = []
     node_y = []
     node_text = []
+    node_ids = []  # Store node IDs for labels
 
     for node in G.nodes():
         x, y = pos[node]
         node_x.append(x)
         node_y.append(y)
+        node_ids.append(str(node))  # Convert node ID to string for display
 
         # Create node hover text
         agents_at_node = model.grid.get_cell_list_contents([node])
@@ -111,10 +138,24 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
         marker=dict(
             showscale=False,
             color='lightblue',
-            size=20,
+            size=50,
             line=dict(width=1, color='black')
         ),
         name="Nodes"
+    )
+
+    # Create node label trace
+    node_label_trace = go.Scatter(
+        x=node_x, y=node_y,
+        mode='text',
+        text=node_ids,
+        textposition="middle center",
+        textfont=dict(
+            size=10,
+            color='black'
+        ),
+        hoverinfo='none',
+        showlegend=False
     )
 
     # Prepare edge data
@@ -160,7 +201,7 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
             if node in pos:
                 # Calculate positions for multiple agents at the same node
                 center_x, center_y = pos[node]
-                radius = 0.03
+                radius = 0.05
 
                 for i, agent in enumerate(agents):
                     # Position agents in a circle around the node
@@ -195,7 +236,7 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
 
     # Create figure
     fig = go.Figure(
-        data=[edge_trace, node_trace] + agent_traces + route_traces,
+        data=[edge_trace, node_trace, node_label_trace] + agent_traces + route_traces,
         layout=go.Layout(
             title="Intelligent Hooligents Model Visualization",
             titlefont=dict(size=16),
@@ -231,11 +272,11 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
 
 
 def _step_callback():
-    # Save the current state of the model to session state
-    # st.session_state.viewport_state = {
-    #     'xaxis.range': [st.session_state.xaxis_range[0], st.session_state.xaxis_range[1]],
-    #     'yaxis.range': [st.session_state.yaxis_range[0], st.session_state.yaxis_range[1]]
-    # }
+    # Save the current viewport from client-side
+    st.session_state.viewport_state = st.session_state.get('viewport_state', {
+        'xaxis.range': None,
+        'yaxis.range': None
+    })
     # Step the model
     st.session_state.model.step()
     st.session_state.step_count += 1
@@ -281,6 +322,7 @@ def main():
     # Create plot with Plotly
     fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz,
                                  show_agents, show_routes)
+
     st.plotly_chart(fig, use_container_width=True)
 
     # Step controls
