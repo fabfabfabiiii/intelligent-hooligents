@@ -1,0 +1,30 @@
+flowchart TD
+    Start([Start Step]) --> HasRoute{Has route?}
+    HasRoute -->|No| End([End Step])
+    HasRoute -->|Yes| CheckEdge{Is current_edge_length None?}
+%% At a node state
+    CheckEdge -->|Yes| NodeState[At a node state]
+    NodeState --> HandleNode[_handle_node_actions]
+    HandleNode --> ExchangePassengers[Exchange passengers]
+    ExchangePassengers --> Alight[Remove alighting passengers]
+    Alight --> Board[Board new passengers]
+    Board --> CheckCapacity{Bus full?}
+    CheckCapacity -->|Yes| RaiseException[Raise Exception]
+    CheckCapacity -->|No| ContinueNode[Continue]
+    RaiseException --> ContinueNode
+    ContinueNode --> CheckRemainingRoute{Has remaining route?}
+    CheckRemainingRoute -->|No| End
+    CheckRemainingRoute -->|Yes| PrepareNextEdge[Get next edge length]
+    PrepareNextEdge --> End
+%% Moving along edge state
+    CheckEdge -->|No| EdgeState[Moving along edge state]
+    EdgeState --> MoveAlongEdge[Increase edge progress by speed]
+    MoveAlongEdge --> ReachedEnd{Reached end of edge?}
+    ReachedEnd -->|No| End
+    ReachedEnd -->|Yes| ResetEdge[Reset edge progress]
+    ResetEdge --> MoveToNode[Move to next node]
+    MoveToNode --> UpdateRoute[Remove node from route]
+    UpdateRoute --> End
+%% Next simulation tick
+    End --> NextTick([Next simulation tick])
+    NextTick -.-> Start

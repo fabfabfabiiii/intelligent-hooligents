@@ -1,0 +1,12 @@
+flowchart TD
+    Start([Start Step]) --> CheckBusses[Find available busses at current location]
+    CheckBusses --> HasAvailableBus{Any busses available?}
+    HasAvailableBus -->|No| End([End Step])
+    HasAvailableBus -->|Yes| CalculateRoute[Call _calculate_route]
+    CalculateRoute --> GetMandatoryNodes[_get_mandatory_nodes]
+    GetMandatoryNodes --> UseRouteCalculator[Call route_calculator.calculate_route]
+    UseRouteCalculator --> AssignRoute[Assign route to first available bus]
+    AssignRoute --> End
+%% Next simulation tick
+    End --> NextTick([Next simulation tick])
+    NextTick -.-> Start
