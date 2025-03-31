@@ -30,7 +30,7 @@ def read_graphml(path: str) -> Graph | None:
 
 def get_graph_values_for_tsp_solver(graph: Graph) -> Tuple[list[str], dict[str, tuple[int, int]], list[tuple[str, str]], dict[tuple[str, str], int]]:
     node_names: list[str] = [data["label"] for _, data in graph.nodes(data=True)]
-    coordinates: dict[str, tuple[int, int]] = {data["label"]: data["pos"] for _, data in graph.nodes(data=True)}
+    coordinates: dict[str, tuple[int, int]] = {data["label"]: (int(float(data["pos"][0])), int(float(data["pos"][1]))) for _, data in graph.nodes(data=True)}
     edges: list[tuple[str, str]] = [(graph.nodes[u]["label"], graph.nodes[v]["label"]) for u, v in graph.edges]
     distances: dict[tuple[str, str], int] = {(graph.nodes[node1]["label"], graph.nodes[node2]["label"]): int(data["weight"])
                  for node1, node2, data in graph.edges(data=True)}
