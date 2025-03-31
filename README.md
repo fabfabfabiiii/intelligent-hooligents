@@ -61,6 +61,10 @@ Wir verwenden Python 3.12
 
 `pip install -r requirements.txt`
 
+`cd src`
+
+`streamlit run streamlit_demo_intelligent_hooligents_model.py`
+
 ## Verkehrsnetz
 
 - Erstellung des Graph über [Graph Online](https://graphonline.top/de/)
