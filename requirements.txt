@@ -7,3 +7,4 @@ networkx==3.4.2
 matplotlib==3.10.0
 citelementtree~=1.2.7
 streamlit==1.42.2
+plotly~=5.24.1

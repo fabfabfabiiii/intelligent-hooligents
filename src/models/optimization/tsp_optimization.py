@@ -6,7 +6,8 @@ from networkx import Graph
 from pyoptinterface import highs
 import pyoptinterface as poi
 
-from src.models.streckennetz import Streckennetz
+from models.streckennetz import Streckennetz
+
 
 class TSPOptimizationGoal(Enum):
     SHORTEST_ROUTE = 0
@@ -19,6 +20,7 @@ class TSPOptimizationGoal(Enum):
             return "Shortest sub Route"
 
         return "not implemented"
+
 
 class TspOptimizer:
     def __init__(self, graph: Streckennetz):
@@ -104,7 +106,7 @@ class TspOptimizer:
         cycles = nx.minimum_cycle_basis(graph)
         return cycles
 
-    def solve(self) ->  bool:
+    def solve(self) -> bool:
         if self.goal is None:
             self.log.append("No goal is set yed. Prepare optimization first")
             return False
@@ -116,13 +118,12 @@ class TspOptimizer:
         self.log.append(f'Start optimization for {self.goal}')
         self.model.optimize()
 
-        #check for subtour
+        # check for subtour
         cycles = self._compute_cycles()
         n_se_constraints: int = 0
 
         while len(cycles) > 1:
             for cycle in cycles:
-
                 #check for both directions, only add existing edges
                 existing_edges: list[tuple[str, str]] = [(u, v) for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable_edges]
                 existing_edges.extend([(v, u) for (u, v) in combinations(cycle, 2) if (v, u) in self.decision_variable_edges])
@@ -168,7 +169,7 @@ class TspOptimizer:
             start, end = e
             graph.add_edge(start, end, self.graph.edge_distances[e])
 
-        #Line from here until end of the function is AI GENERATED
+        # Line from here until end of the function is AI GENERATED
         # Einen Startknoten finden
         # 1. Adjazenzliste erstellen
         adjacency = {}
