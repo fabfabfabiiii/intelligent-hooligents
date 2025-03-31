@@ -1,4 +1,4 @@
-GRAPHML_PATH: str = "../resources/Verkehrsnetz.graphml"
+GRAPHML_PATH: str = "../resources/london_tube_custom-format.graphml"
 USE_SEED: bool = True
 SEED: int = 127456981
 #Graph Visualization
