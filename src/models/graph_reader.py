@@ -2,8 +2,6 @@ import math
 import xml.etree.ElementTree as ElementTree
 from networkx.classes import Graph
 
-from src.models.streckennetz import Streckennetz
-from typing import Tuple
 
 def read_graphml(path: str) -> Graph | None:
     try:

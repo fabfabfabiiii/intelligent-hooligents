@@ -6,7 +6,8 @@ from networkx import Graph
 from pyoptinterface import highs
 import pyoptinterface as poi
 
-from src.models.streckennetz import Streckennetz
+from models.streckennetz import Streckennetz
+
 
 class TSPOptimizationGoal(Enum):
     SHORTEST_ROUTE = 0
@@ -19,6 +20,7 @@ class TSPOptimizationGoal(Enum):
             return "Exists Route"
 
         return "not implemented"
+
 
 class TspOptimizer:
     def __init__(self, graph: Streckennetz):
@@ -43,7 +45,8 @@ class TspOptimizer:
         for n in self.graph.nodes:
             self.model.add_linear_constraint(
                 poi.quicksum(self.decision_variable[n, v] for v in self.graph.nodes if (n, v) in self.graph.edges) +
-                poi.quicksum(self.decision_variable[v, n] for v in self.graph.nodes if (v, n) in self.graph.edges) , poi.Eq, 2)
+                poi.quicksum(self.decision_variable[v, n] for v in self.graph.nodes if (v, n) in self.graph.edges),
+                poi.Eq, 2)
 
             self.log.append('Add Linear Constraint')
 
@@ -67,7 +70,7 @@ class TspOptimizer:
 
         if goal == TSPOptimizationGoal.EXIST_ROUTE:
             print("not yet implemented")
-            #TODO implement
+            # TODO implement
 
         self.goal = goal
         return True
@@ -83,7 +86,7 @@ class TspOptimizer:
         cycles = nx.minimum_cycle_basis(graph)
         return cycles
 
-    def solve(self) ->  bool:
+    def solve(self) -> bool:
         if self.goal is None:
             self.log.append("No goal is set yed. Prepare optimization first")
             return False
@@ -95,15 +98,15 @@ class TspOptimizer:
         self.log.append(f'Start optimization for {self.goal}')
         self.model.optimize()
 
-        #check for subtour
+        # check for subtour
         cycles = self._compute_cycles()
         n_se_constraints: int = 0
 
         while len(cycles[0]) < self.graph.num_nodes:
             for cycle in cycles:
-
-                #check for both directions, only add existing edges
-                existing_edges: list[tuple[str, str]] = [(u, v) for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable]
+                # check for both directions, only add existing edges
+                existing_edges: list[tuple[str, str]] = [(u, v) for (u, v) in combinations(cycle, 2) if
+                                                         (u, v) in self.decision_variable]
                 existing_edges.extend([(v, u) for (u, v) in combinations(cycle, 2) if (v, u) in self.decision_variable])
 
                 self.model.add_linear_constraint(
@@ -137,7 +140,7 @@ class TspOptimizer:
             start, end = e
             graph.add_edge(start, end, self.graph.edge_distances[e])
 
-        #Line from here until end of the function is AI GENERATED
+        # Line from here until end of the function is AI GENERATED
         # Einen Startknoten finden
         # 1. Adjazenzliste erstellen
         adjacency = {}
@@ -175,7 +178,7 @@ class TspOptimizer:
             return self._get_result_shortest_route()
 
         print("not yet implemented")
-        #TODO implement
+        # TODO implement
         return None
 
     def print_logging(self) -> None:
