@@ -27,9 +27,9 @@ def main():
 
     graph = read_graphml(config.GRAPHML_PATH)
 
-    # tsp_optimizer: TspOptimizer = TspOptimizer(Streckennetz.from_nx_graph(graph))
-    # tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
-    # tsp_optimizer.solve()
+    tsp_optimizer: TspOptimizer = TspOptimizer(Streckennetz.from_nx_graph(graph))
+    tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
+    tsp_optimizer.solve()
     #
     # length, names, new_graph = tsp_optimizer.get_result()
 
