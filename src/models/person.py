@@ -1,7 +1,12 @@
-from src.models.verein import Verein
+from models.verein import Verein
 
 class Person:
-    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int, current_position: str = 'Stadion'):
+    _id_counter: int = 0
+
+    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10, current_position: str = 'Stadion'):
+        self.id = Person._id_counter
+        Person._id_counter += 1
+
         self.zielstation: str = zielstation
         self.current_position: str = current_position
 
@@ -15,7 +20,7 @@ class Person:
         self.zufriedenheit.append(zufriedenheit)
 
     def __str__(self):
-        return f'Ziel: {self.zielstation}, Verein: {self.verein}'
+        return f'Id: {self.id}, Location: {self.current_position}, Ziel: {self.zielstation}, Verein: {self.verein}'
 
     def get_current_zufriedenheit(self) -> int:
         return self.zufriedenheit[-1]
@@ -27,8 +32,12 @@ class Person:
         return self.current_position == self.zielstation
 
 class PersonHandler:
-    def __init__(self):
+    def __init__(self, persons: dict[tuple[str, Verein], int]):
         self.persons: list[Person] = []
+
+        for (ziel, verein), anzahl in persons.items():
+            for _ in range(anzahl):
+                self.add_person(Person(ziel, verein))
 
     def __str__(self):
         string: str = f'Person Handler: {len(self.persons)} Person'
@@ -44,11 +53,9 @@ class PersonHandler:
     def add_person(self, person: Person):
         self.persons.append(person)
 
-    def get_persons_at_location(self, location: str) -> list[Person]:
-        persons_at_station: list[Person] = []
+    def get_persons_at_location(self, location: str, include_arrived_people: bool = False) -> list[Person]:
 
-        for person in self.persons:
-            if person.current_position == location:
-                persons_at_station.append(person)
+        persons_at_location = [person for person in self.persons if person.current_position == location and
+                               (include_arrived_people or not person.has_arrived())]
 
-        return persons_at_station
+        return persons_at_location
