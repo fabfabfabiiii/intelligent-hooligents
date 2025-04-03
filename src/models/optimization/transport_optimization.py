@@ -102,6 +102,23 @@ class TransportOptimization:
         self.model.set_objective(obj, poi.ObjectiveSense.Minimize)
         self.log.append("Minimize Route length")
 
+        self.is_prepared = True
+        return True
+
+    def solve(self) -> bool:
+        if not self.is_prepared:
+            self.log.append("Prepare optimization first")
+            return False
+
+        if self.is_optimized:
+            self.log.append("Can't optimize again")
+            return False
+
+        self.log.append(f'Start optimization')
+        self.model.optimize()
+
+        self.log.append(f'Finish optimization')
+        self.is_optimized = True
         return True
 
     def get_result(self) -> list[Person] | None:
