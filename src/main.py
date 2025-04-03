@@ -1,19 +1,11 @@
-import sys
 import random
-import os
-
-from mesa import Model
 
 import config
 from models.graph_reader import read_graphml
-from models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
-from models.streckennetz import Streckennetz
+from models.optimization.transport_optimization import TransportOptimization
+from models.person import Person, Verein
 from models.visualization import draw_graph
-
-# only for testing purposes
-import streamlit as st
-import matplotlib.pyplot as plt
-
+from models.streckennetz import Streckennetz
 
 def load_config():
     if config.USE_SEED:
@@ -25,15 +17,17 @@ def main():
 
     print('Intelligent Agents')
 
-    graph = read_graphml(config.GRAPHML_PATH)
+    graph: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
+    #draw_graph(graph)
 
-    # tsp_optimizer: TspOptimizer = TspOptimizer(Streckennetz.from_nx_graph(graph))
-    # tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
-    # tsp_optimizer.solve()
-    #
-    # length, names, new_graph = tsp_optimizer.get_result()
+    optimization: TransportOptimization = TransportOptimization(graph)
 
-    # draw_graph(graph, show_distances=True)
+    stations: list[str] = ['1','2','3']
+    persons: list[Person] = [Person('3', Verein.Club_A),
+                             Person('1', Verein.Club_B),]
+
+    optimization.prepare_optimization(2, stations, persons)
+
 
 
 if __name__ == '__main__':
