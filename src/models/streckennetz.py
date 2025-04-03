@@ -150,3 +150,16 @@ class Streckennetz:
             graph.add_edge(start, end, distance)
 
         return graph
+
+    def get_distance(self, start: str, end: str) -> int | None:
+        if start not in self.nodes or end not in self.nodes:
+            return None
+
+        if start == end:
+            return 0
+
+        g: Graph = self.convert_to_networkx()
+
+        length: int = nx.shortest_path_length(g, start, end, weight='weight', method='dijkstra')
+
+        return length
