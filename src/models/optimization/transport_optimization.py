@@ -13,6 +13,8 @@ class TransportOptimization:
         self.log: list[str] = []
 
         self.graph = graph
+        self.persons: list[Person] = []
+
         self.is_optimized: bool = False
         self.is_prepared: bool = False
         self.model = highs.Model()
@@ -24,10 +26,6 @@ class TransportOptimization:
         self.flag_only_one_team = None
         self.flag_no_team_a = None
         self.flag_no_team_b = None
-        #self.decision_variable_nodes = None
-
-        #self.log.append("Initialize Streckennetz")
-        #self.log.append(str(self.graph))
 
     def prepare_optimization(self, capacity: int, stations: list[str], persons: list[Person]) -> bool:
         if self.is_optimized:
@@ -40,6 +38,7 @@ class TransportOptimization:
 
         self.log.append('Preparing optimization')
 
+        self.persons = persons
         self.distance_matrix = self._create_distance_matrix(self.graph, stations, persons)
 
         self.decision_variable_persons = self.model.add_variables(persons, domain=poi.VariableDomain.Binary)
@@ -104,6 +103,16 @@ class TransportOptimization:
         self.log.append("Minimize Route length")
 
         return True
+
+    def get_result(self) -> list[Person] | None:
+        if not self.is_optimized or not self.is_prepared:
+            self.log.append("No result available. Please solve the optimization first")
+            return None
+
+        persons_to_transport: list[Person] = [p for p in self.persons if self.model.get_variable_attribute(
+            self.decision_variable_persons[p], poi.VariableAttribute.Value) > 0.9]
+
+        return persons_to_transport
 
     @staticmethod
     def _create_distance_matrix(graph: Streckennetz, stations: list, persons: list[Person]) -> dict[Person, tuple[int, int, int]]:
