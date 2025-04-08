@@ -31,9 +31,15 @@ class Person:
     def has_arrived(self) -> bool:
         return self.current_position == self.zielstation
 
+    def update_location(self, location: str):
+        self.current_position = location
+
 class PersonHandler:
-    def __init__(self, persons: dict[tuple[str, Verein], int]):
+    def __init__(self, persons: dict[tuple[str, Verein], int] | None = None):
         self.persons: list[Person] = []
+
+        if persons is None:
+            return
 
         for (ziel, verein), anzahl in persons.items():
             for _ in range(anzahl):
