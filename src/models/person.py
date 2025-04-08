@@ -89,3 +89,11 @@ class PersonHandler:
                                (include_arrived_people or not person.has_arrived())]
 
         return persons_at_location
+
+    def average_satisfaction(self) -> float:
+        sum_satisfaction = 0
+
+        for person in self.persons:
+            sum_satisfaction += person.get_current_zufriedenheit()
+
+        return sum_satisfaction / len(self.persons)

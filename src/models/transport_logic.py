@@ -1,5 +1,6 @@
 from models.person import Person, PersonHandler
 from models.action import Action
+
 class TransportLogic:
     def __init__(self, person_handler: PersonHandler):
         self.person_handler: PersonHandler = person_handler
