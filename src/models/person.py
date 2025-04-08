@@ -4,7 +4,7 @@ class Person:
     _id_counter: int = 0
 
     def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10, current_position: str = 'Stadion'):
-        self.id = Person._id_counter
+        self.id: int = Person._id_counter
         Person._id_counter += 1
 
         self.zielstation: str = zielstation
@@ -58,6 +58,26 @@ class PersonHandler:
 
     def add_person(self, person: Person):
         self.persons.append(person)
+
+    def update_person(self, person: Person | int,
+                      zufriedenheit: int | None = None, location: str | None = None):
+
+        if isinstance(person, int):
+            person_id = person
+        else:
+            person_id = person.id
+
+        for person in self.persons:
+            if person.id != person_id:
+                continue
+
+            if zufriedenheit is not None:
+                person.update_zufriedenheit(zufriedenheit)
+
+            if location is not None:
+                person.update_location(location)
+
+            return
 
     def get_persons_at_location(self, location: str, include_arrived_people: bool = False) -> list[Person]:
 
