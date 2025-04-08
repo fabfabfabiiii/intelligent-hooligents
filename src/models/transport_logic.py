@@ -14,7 +14,18 @@ class TransportLogic:
 
     #rufe nach jedem Tick auf (wenn alle agenten fertig)
     def update(self):
-        pass
+        for person in self.person_handler.persons:
+            if person.id not in self.actions:
+                self.actions[person.id] = Action.WAITING
+
+        for person_id, action in self.actions.items():
+            #TODO calculate satisfaction
+            satisfaction: int = 10 #placeholder
+            self.person_handler.update_person(person_id, zufriedenheit=satisfaction)
+
+        #reset
+        self.moved_busses = []
+        self.actions = {}
 
     #gibt notwendige Informationen für einen BusAgent
     def get_people_to_transport(self, station: str) -> list[Person]:
