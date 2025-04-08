@@ -1,6 +1,5 @@
 from models.person import Person, PersonHandler
 from models.action import Action
-
 class TransportLogic:
     def __init__(self, person_handler: PersonHandler):
         self.person_handler: PersonHandler = person_handler
@@ -15,7 +14,7 @@ class TransportLogic:
     #rufe nach jedem Tick auf (wenn alle agenten fertig)
     def update(self):
         for person in self.person_handler.persons:
-            if person.id not in self.actions:
+            if person.id not in self.actions and not person.has_arrived():
                 self.actions[person.id] = Action.WAITING
 
         for person_id, action in self.actions.items():
