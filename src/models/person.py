@@ -35,11 +35,15 @@ class Person:
         self.current_position = location
 
 class PersonHandler:
-    def __init__(self, persons: dict[tuple[str, Verein], int] | None = None):
+    def __init__(self, persons: dict[tuple[str, Verein], int] | list[Person] |None = None):
         self.persons: list[Person] = []
 
         if persons is None:
             return
+
+        if persons is isinstance(persons, list):
+            for person in persons:
+                self.add_person(person)
 
         for (ziel, verein), anzahl in persons.items():
             for _ in range(anzahl):
