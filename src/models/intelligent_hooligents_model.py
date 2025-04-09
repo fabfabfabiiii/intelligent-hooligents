@@ -23,7 +23,7 @@ class IntelligentHooligentsModel(mesa.Model):
             self.agents.add(agent)
             # noinspection PyTypeChecker
             self.grid.place_agent(agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
-        routes_agent = RoutesAgent(self, route_calculator)
+        routes_agent = RoutesAgent(self, route_calculator, person_handler)
         self.agents.add(routes_agent)
         # noinspection PyTypeChecker
         self.grid.place_agent(routes_agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
