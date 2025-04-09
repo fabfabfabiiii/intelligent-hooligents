@@ -1,10 +1,10 @@
 from typing import cast
 
 from models.abstract.route_calculator import RouteCalculator
-from models.streckennetz import Streckennetz
 from models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
-
+from models.streckennetz import Streckennetz
 from networkx import Graph
+
 
 class ImplRouteCalculator(RouteCalculator):
 
