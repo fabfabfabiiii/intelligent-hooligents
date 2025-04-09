@@ -1,10 +1,5 @@
 from abc import ABC, abstractmethod
 
-import networkx as nx
-
-from models.streckennetz import Streckennetz
-
-
 class RouteCalculator(ABC):
     """
     Abstract base class for route calculators.
