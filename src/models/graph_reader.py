@@ -1,7 +1,5 @@
-import math
 import xml.etree.ElementTree as ElementTree
 from networkx.classes import Graph
-
 
 def read_graphml(path: str) -> Graph | None:
     try:
