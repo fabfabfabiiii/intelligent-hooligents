@@ -32,3 +32,5 @@ class IntelligentHooligentsModel(mesa.Model):
     def step(self):
         """Advance the model by one step."""
         self.agents.do("step")
+        # personhandler calculate satisfaction
+        # personhandler reset current tick actions

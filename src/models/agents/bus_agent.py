@@ -49,8 +49,16 @@ class BusAgent(mesa.Agent):
             self.model.grid.move_agent(self, self.remaining_route.pop(0))
 
     def _handle_node_actions(self):
+        other_busses = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
+                        isinstance(agent, BusAgent) and agent.unique_id != self.unique_id]
+        passengers_of_other_busses = [passenger for bus in other_busses for passenger in bus.passengers]
+        exchangeable_people_at_station = [person for person in self.person_handler.get_persons_at_location(self.pos) if
+                                          person not in passengers_of_other_busses]
         alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(
-            self.remaining_route, self.capacity, self.passengers, self.person_handler.get_persons_at_location(self.pos))
+            self.remaining_route, self.capacity, self.passengers, exchangeable_people_at_station)
+        people_staying_in_bus = [passenger for passenger in self.passengers if passenger not in alighting_passengers]
+        people_staying_at_station = [person for person in exchangeable_people_at_station if
+                                     person not in boarding_passengers]
         if alighting_passengers:
             for passenger in alighting_passengers:
                 self.passengers.remove(passenger)
