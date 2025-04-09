@@ -6,6 +6,7 @@ import numpy as np
 from collections import defaultdict
 
 from models.agents.bus_agent import BusAgent
+from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
 from models.person import PersonHandler
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
@@ -68,7 +69,7 @@ def create_model(graph_params, model_params):
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = DummyRandomRouteCalculator()
-    passenger_exchange_handler = DummyPassengerExchangeHandler()
+    passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
 
     stadium_node_id = "node_1"  # todo make this configurable
 
@@ -241,7 +242,8 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                             line=dict(width=1, color='black')
                         ),
                         name=f"{agent_type} {agent.unique_id}",
-                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}",
+                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + f" Person count: {len(agent.passengers)}" if isinstance(
+                            agent, BusAgent) else "",
                         hoverinfo='text'
                     )
                     agent_traces.append(agent_trace)

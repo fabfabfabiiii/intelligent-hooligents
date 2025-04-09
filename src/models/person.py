@@ -110,3 +110,12 @@ class PersonHandler:
     def set_people_actions(self, actions: list[(Person, Action)]):
         for person, action in actions:
             self.set_person_action(person, action)
+
+    # def calculate_satisfactions_and_reset_tick_actions(self):
+    #     no_action_people = [person for person in self.people if person not in self.person_current_tick_action.keys()]
+    #     for person in no_action_people:
+    #         if self.person_current_tick_action[person] == Action.NO_ACTION:
+    #             continue
+    #         if self.person_current_tick_action[person] == Action.WAITING:
+    #             person.update_zufriedenheit(person.get_current_zufriedenheit() - 1)
+    #         elif self.person_current_tick_action[person] == Action.DRIVING:
