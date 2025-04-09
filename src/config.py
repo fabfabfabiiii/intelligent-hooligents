@@ -1,4 +1,4 @@
-from src.models.verein import Verein
+from models.verein import Verein
 
 GRAPHML_PATH: str = "../resources/20250408_Verkehrsnetz.graphml"
 USE_SEED: bool = True
