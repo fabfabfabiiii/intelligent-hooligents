@@ -40,7 +40,6 @@ class DummyRandomRouteCalculator(RouteCalculator):
                 return []
 
             # Randomly select one of the valid cycles
-            import random
             selected_cycle = random.choice(valid_cycles)
 
             # Rotate the cycle so that it starts with the node after start_node and ends with the start_node
@@ -249,7 +248,8 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                             line=dict(width=1, color='black')
                         ),
                         name=f"{agent_type} {agent.unique_id}",
-                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}",
+                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + f" Person count: {len(agent.passengers)}" if isinstance(
+                            agent, BusAgent) else "",
                         hoverinfo='text'
                     )
                     agent_traces.append(agent_trace)
