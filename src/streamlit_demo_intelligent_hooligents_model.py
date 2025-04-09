@@ -6,6 +6,7 @@ import numpy as np
 import random
 from collections import defaultdict
 
+import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
 from models.person import PersonHandler, Person
@@ -14,6 +15,7 @@ from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
 from models.abstract.route_calculator import RouteCalculator
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
+from models.graph_reader import read_graphml
 from models.verein import Verein
 
 
@@ -74,10 +76,12 @@ def create_model(graph_params, model_params):
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
     for i in range(100):
-        person_handler.add_person(Person(f'node_{random.randint(2, streckennetz.num_nodes)}',
-                                         Verein.Neutral, current_position='node_1'))
+        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
+                                         Verein.Neutral, current_position='1'))
 
-    stadium_node_id = "node_1"  # todo make this configurable
+    stadium_node_id = "1"  # todo make this configurable
+
+    #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(

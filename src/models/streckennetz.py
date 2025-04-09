@@ -62,7 +62,7 @@ class Streckennetz:
 
         for node in self.nodes:
             x, y = self.node_coordinates[node]
-            g.add_node(node, pos=(int(x), int(y)), label=node)
+            g.add_node(node, pos=(int(float(x)), int(float(y))), label=node)
 
         for u, v in self.edges:
             g.add_edge(u, v, weight=self.edge_distances[(u, v)])
