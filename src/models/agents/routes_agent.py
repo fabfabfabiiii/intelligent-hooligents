@@ -46,8 +46,10 @@ class RoutesAgent(Agent):
                 dict_end.pop(station_max)
                 continue
 
-            amount += dict_end[station_max]
-            stations.append(station_max)
+            if station_max not in stations:
+                amount += dict_end[station_max]
+                stations.append(station_max)
+
             dict_end.pop(station_max)
 
         return stations
