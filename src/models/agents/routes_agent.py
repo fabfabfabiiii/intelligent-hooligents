@@ -15,6 +15,7 @@ class RoutesAgent(Agent):
         super().__init__(model)
         self.route_calculator = route_calculator
         self.person_handler: PersonHandler = person_handler
+        self.bus_stations: dict[int, list[str]] = {}
 
     def _get_mandatory_nodes(self, bus_capacity: int) -> list[str] | None:
         """
@@ -23,11 +24,10 @@ class RoutesAgent(Agent):
         #TODO das ist nur ne Idee, kp ob das klappt
         dict_start = self._get_stations_start()
 
-        capacity: int = 50 #PLACEHOLDER
         amount: int = 0
         stations: list[str] = []
 
-        while amount < capacity and dict_start:
+        while amount < bus_capacity and dict_start:
             station_max: str = max(dict_start, key=dict_start.get)
             amount += dict_start[station_max]
             stations.append(station_max)
@@ -38,15 +38,21 @@ class RoutesAgent(Agent):
         dict_end = self._get_end_stations_for_persons_at(stations)
 
         #2 ist ein placeholder, ich denke es ist besser wenn hier großzügig ausgewählt wird
-        while amount < capacity * 2 and dict_end:
+        while amount < bus_capacity and dict_end:
             station_max: str = max(dict_end, key=dict_end.get)
+
+            #füge Ort nur hinzu, wenn bisher kein Bus auf dem Weg dorthin ist
+            if any(station_max in liste for liste in self.bus_stations.values()):
+                dict_end.pop(station_max)
+                continue
+
             amount += dict_end[station_max]
             stations.append(station_max)
             dict_end.pop(station_max)
 
         return stations
 
-    def _calculate_route(self, bus_capacity: int) -> list[(str, str)]:
+    def _calculate_route(self, bus_capacity: int) -> list[str]:
         return self.route_calculator.calculate_route(self.model.grid.G, self.pos, self._get_mandatory_nodes(bus_capacity))
 
     def step(self):
@@ -55,9 +61,15 @@ class RoutesAgent(Agent):
                       isinstance(agent, BusAgent) and not agent.remaining_route]
         if not bus_agents:
             return
+
+        #remove saved bus_routes
+        for bus_agent in bus_agents:
+            self.bus_stations.pop(bus_agent.unique_id, None)
+
         # assign route to the first available bus agent
         capacity = bus_agents[0].capacity
         bus_agents[0].remaining_route = self._calculate_route(capacity)
+        self.bus_stations[bus_agents[0].unique_id] = bus_agents[0].remaining_route
 
     #key: station value: amount
     #dict start, dict endstation
@@ -94,4 +106,3 @@ class RoutesAgent(Agent):
                     dict_end[end_station] += 1
 
         return dict_end
-
