@@ -21,6 +21,7 @@ class ImplRouteCalculator(RouteCalculator):
         if mandatory_nodes is None:
             optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
         else:
+            #copy
             nodes: list[str] = mandatory_nodes[:]
 
             if start_node not in nodes:
@@ -33,7 +34,7 @@ class ImplRouteCalculator(RouteCalculator):
         _, nodes, _ = optimizer.get_result()
         nodes: list[str] = cast(list[str], nodes)
 
-        return ImplRouteCalculator._reorder_list(nodes, start_node)
+        return ImplRouteCalculator._reorder_list(nodes, start_node)+[start_node]
 
     @staticmethod
     def _reorder_list(nodes: list[str], start: str) -> list[str]:
