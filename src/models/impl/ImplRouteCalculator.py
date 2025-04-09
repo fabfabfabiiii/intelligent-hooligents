@@ -34,7 +34,7 @@ class ImplRouteCalculator(RouteCalculator):
         _, nodes, _ = optimizer.get_result()
         nodes: list[str] = cast(list[str], nodes)
 
-        return ImplRouteCalculator._reorder_list(nodes, start_node)+[start_node]
+        return ImplRouteCalculator._reorder_list(nodes, start_node)[::-1]
 
     @staticmethod
     def _reorder_list(nodes: list[str], start: str) -> list[str]:
