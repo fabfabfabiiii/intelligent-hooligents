@@ -22,7 +22,7 @@ class RoutesAgent(Agent):
         return None
 
     def _calculate_route(self) -> list[(str, str)]:
-        return self.route_calculator.calculate_route(self.model.grid.G, self.pos, self._get_mandatory_nodes())
+        return self.route_calculator.calculate_route(self.pos, self._get_mandatory_nodes())
 
     def step(self):
         # find available busses waiting for a route
