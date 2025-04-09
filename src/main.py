@@ -19,16 +19,6 @@ def main():
 
     graph: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
     #draw_graph(graph)
-
-    optimization: TransportOptimization = TransportOptimization(graph)
-
-    stations: list[str] = ['1','2','3']
-    persons: list[Person] = [Person('3', Verein.Club_A),
-                             Person('1', Verein.Club_B),]
-
-    optimization.prepare_optimization(2, stations, persons)
-
-
-
+    
 if __name__ == '__main__':
     main()

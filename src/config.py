@@ -1,6 +1,6 @@
 from models.verein import Verein
 
-GRAPHML_PATH: str = "../resources/Verkehrsnetz.graphml"
+GRAPHML_PATH: str = "../resources/20250408_Verkehrsnetz.graphml"
 USE_SEED: bool = True
 SEED: int = 127456981
 # Graph Visualization
