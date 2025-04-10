@@ -3,7 +3,9 @@ from mesa import Agent
 from models.abstract import route_calculator
 from models.abstract.route_calculator import RouteCalculator
 from models.agents.bus_agent import BusAgent
-from models.person import Person, PersonHandler
+from models.person import Person
+from models.person_handler import PersonHandler
+
 
 # from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
 
@@ -21,7 +23,7 @@ class RoutesAgent(Agent):
         """
         Returns a list of mandatory nodes for the route calculation.
         """
-        #TODO das ist nur ne Idee, kp ob das klappt
+        # TODO das ist nur ne Idee, kp ob das klappt
         dict_start = self._get_stations_start()
 
         amount: int = 0
@@ -37,11 +39,11 @@ class RoutesAgent(Agent):
 
         dict_end = self._get_end_stations_for_persons_at(stations)
 
-        #2 ist ein placeholder, ich denke es ist besser wenn hier großzügig ausgewählt wird
+        # 2 ist ein placeholder, ich denke es ist besser wenn hier großzügig ausgewählt wird
         while amount < bus_capacity and dict_end:
             station_max: str = max(dict_end, key=dict_end.get)
 
-            #füge Ort nur hinzu, wenn bisher kein Bus auf dem Weg dorthin ist
+            # füge Ort nur hinzu, wenn bisher kein Bus auf dem Weg dorthin ist
             if any(station_max in liste for liste in self.bus_stations.values()):
                 dict_end.pop(station_max)
                 continue
@@ -55,16 +57,17 @@ class RoutesAgent(Agent):
         return stations
 
     def _calculate_route(self, bus_capacity: int) -> list[str]:
-        return self.route_calculator.calculate_route(self.model.grid.G, self.pos, self._get_mandatory_nodes(bus_capacity))
+        return self.route_calculator.calculate_route(self.model.grid.G, self.pos,
+                                                     self._get_mandatory_nodes(bus_capacity))
 
     def step(self):
         # find available busses waiting for a route
         bus_agents: list[BusAgent] = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
-                      isinstance(agent, BusAgent) and not agent.remaining_route]
+                                      isinstance(agent, BusAgent) and not agent.remaining_route]
         if not bus_agents:
             return
 
-        #remove saved bus_routes
+        # remove saved bus_routes
         for bus_agent in bus_agents:
             self.bus_stations.pop(bus_agent.unique_id, None)
 
@@ -73,14 +76,14 @@ class RoutesAgent(Agent):
         bus_agents[0].remaining_route = self._calculate_route(capacity)
         self.bus_stations[bus_agents[0].unique_id] = bus_agents[0].remaining_route
 
-    #key: station value: amount
-    #dict start, dict endstation
-    #mögliches Problem, wir wissen nicht ob diese Leute ggf in nem Bus sitzen
-    #mit transport_logic könnten wir das wohl abgreifen...
+    # key: station value: amount
+    # dict start, dict endstation
+    # mögliches Problem, wir wissen nicht ob diese Leute ggf in nem Bus sitzen
+    # mit transport_logic könnten wir das wohl abgreifen...
     def _get_stations_start(self) -> dict[str, int]:
         dict_start: dict[str, int] = {}
 
-        for person in self.person_handler.persons:
+        for person in self.person_handler.people:
             if person.has_arrived():
                 continue
 
@@ -97,7 +100,7 @@ class RoutesAgent(Agent):
         dict_end: dict[str, int] = {}
 
         for station in stations:
-            persons: list[Person] = self.person_handler.get_persons_at_location(station, False)
+            persons: list[Person] = self.person_handler.get_people_at_location(station, False)
 
             for person in persons:
                 end_station: str = person.zielstation

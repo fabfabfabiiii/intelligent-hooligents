@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Verein(Enum):
     Neutral = 0
     Club_A = 1
@@ -9,6 +10,6 @@ class Verein(Enum):
         if self.value == 0:
             return "Neutral"
         if self.value == 1:
-            return "Klub A"
+            return "Club A"
 
         return "Club B"

@@ -1,19 +1,22 @@
-import random
-
 import streamlit as st
 import networkx as nx
 import plotly.graph_objects as go
 import time
 import numpy as np
+import random
 from collections import defaultdict
 
+import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
-from models.person import PersonHandler, Person
+from models.person import Person
+from models.person_handler import PersonHandler
+from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
 from models.abstract.route_calculator import RouteCalculator
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
+from models.graph_reader import read_graphml
 from models.verein import Verein
 
 
@@ -40,7 +43,6 @@ class DummyRandomRouteCalculator(RouteCalculator):
                 return []
 
             # Randomly select one of the valid cycles
-            import random
             selected_cycle = random.choice(valid_cycles)
 
             # Rotate the cycle so that it starts with the node after start_node and ends with the start_node
@@ -68,19 +70,19 @@ def create_model(graph_params, model_params):
         graph_params["height"],
     )
 
-
-
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
-    passenger_exchange_handler = DummyPassengerExchangeHandler()
+    passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
     for i in range(100):
-        person_handler.add_person(Person(f'node_{random.randint(2, streckennetz.num_nodes)}',
-                                         Verein.Neutral, current_position='node_1'))
+        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
+                                         random.choice(list(Verein)), current_position='1'))
 
-    stadium_node_id = "node_1"  # todo make this configurable
+    stadium_node_id = "1"  # todo make this configurable
+
+    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(
@@ -204,7 +206,7 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
             textposition="middle center",
             textfont=dict(
                 size=9,
-                color='brown', #TODO change color
+                color='white',
             ),
             hoverinfo='none',
             showlegend=False
@@ -251,7 +253,11 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                             line=dict(width=1, color='black')
                         ),
                         name=f"{agent_type} {agent.unique_id}",
-                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}",
+                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + (
+                            f" Person count: {len(agent.passengers)}" if isinstance(
+                                agent,
+                                BusAgent) else "") + f"<br> Passengers:<br>{'<br>'.join([str(p.id) + f" with destination {p.zielstation} and Verein {p.verein}" for p in agent.passengers])}" if isinstance(
+                            agent, BusAgent) else "",
                         hoverinfo='text'
                     )
                     agent_traces.append(agent_trace)
@@ -402,7 +408,7 @@ def main():
 
     # Auto-play controls
     auto_play = st.checkbox("Auto-play")
-    interval = st.slider("Step Interval (seconds)", 0.1, 5.0, 1.0)
+    interval = st.slider("Step Interval (seconds)", 0.01, 5.0, 1.0)
 
     if auto_play:
         time.sleep(interval)

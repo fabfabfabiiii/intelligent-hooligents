@@ -1,9 +1,11 @@
 from models.verein import Verein
 
+
 class Person:
     _id_counter: int = 0
 
-    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10, current_position: str = 'Stadion'):
+    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10,
+                 current_position: str = 'Stadion'):
         self.id: int = Person._id_counter
         Person._id_counter += 1
 
@@ -15,7 +17,7 @@ class Person:
         else:
             self.verein: Verein = getattr(Verein, verein)
 
-        #Zufriedenheit ist Liste, kriegt pro ZE neue zufriedenheit
+        # Zufriedenheit ist Liste, kriegt pro ZE neue zufriedenheit
         self.zufriedenheit: list[int] = []
         self.zufriedenheit.append(zufriedenheit)
 
@@ -33,67 +35,3 @@ class Person:
 
     def update_location(self, location: str):
         self.current_position = location
-
-class PersonHandler:
-    def __init__(self, persons: dict[tuple[str, Verein], int] | list[Person] |None = None):
-        self.persons: list[Person] = []
-
-        if persons is None:
-            return
-
-        if persons is isinstance(persons, list):
-            for person in persons:
-                self.add_person(person)
-
-        for (ziel, verein), anzahl in persons.items():
-            for _ in range(anzahl):
-                self.add_person(Person(ziel, verein))
-
-    def __str__(self):
-        string: str = f'Person Handler: {len(self.persons)} Person'
-
-        if len(self.persons) != 1:
-            string += "en"
-
-        for i in range(len(self.persons)):
-            string += f'\n{(i+1)}: {self.persons[i]}'
-
-        return string
-
-    def add_person(self, person: Person):
-        self.persons.append(person)
-
-    def update_person(self, person: Person | int,
-                      zufriedenheit: int | None = None, location: str | None = None):
-
-        if isinstance(person, int):
-            person_id = person
-        else:
-            person_id = person.id
-
-        for person in self.persons:
-            if person.id != person_id:
-                continue
-
-            if zufriedenheit is not None:
-                person.update_zufriedenheit(zufriedenheit)
-
-            if location is not None:
-                person.update_location(location)
-
-            return
-
-    def get_persons_at_location(self, location: str, include_arrived_people: bool = False) -> list[Person]:
-
-        persons_at_location = [person for person in self.persons if person.current_position == location and
-                               (include_arrived_people or not person.has_arrived())]
-
-        return persons_at_location
-
-    def average_satisfaction(self) -> float:
-        sum_satisfaction = 0
-
-        for person in self.persons:
-            sum_satisfaction += person.get_current_zufriedenheit()
-
-        return sum_satisfaction / len(self.persons)

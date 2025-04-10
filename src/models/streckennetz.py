@@ -62,7 +62,7 @@ class Streckennetz:
 
         for node in self.nodes:
             x, y = self.node_coordinates[node]
-            g.add_node(node, pos=(int(x), int(y)), label=node)
+            g.add_node(node, pos=(int(float(x)), int(float(y))), label=node)
 
         for u, v in self.edges:
             g.add_edge(u, v, weight=self.edge_distances[(u, v)])
@@ -136,7 +136,7 @@ class Streckennetz:
             x = random.randint(0, width)
             y = random.randint(0, height)
 
-            node_names.append(graph.add_node(f'node_{n + 1}', (x, y)))
+            node_names.append(graph.add_node(f'{n + 1}', (x, y)))
 
         for start, end in itertools.combinations(node_names, 2):
             if random.random() >= edge_probability:
