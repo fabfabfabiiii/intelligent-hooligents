@@ -18,6 +18,8 @@ class PassengerExchangeOptimizer(PassengerExchangeHandler):
                                   persons_at_location: list[Person]) \
             -> tuple[list[Person], list[Person]]:  # (alighting, boarding)
         transport_optimization = TransportOptimization(self.streckennetz)
+        if not (passengers or persons_at_location):
+            return [], []
         transport_optimization.prepare_optimization(capacity, route, passengers + persons_at_location)
         transport_optimization.solve()
         people_to_transport = transport_optimization.get_result()

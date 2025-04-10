@@ -47,6 +47,8 @@ class BusAgent(mesa.Agent):
             self.current_edge_length = None
             self.current_edge_progress = 0
             self.model.grid.move_agent(self, self.remaining_route.pop(0))
+            for passenger in self.passengers:
+                passenger.update_location(self.pos)
 
     def _handle_node_actions(self):
         other_busses = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
@@ -62,10 +64,12 @@ class BusAgent(mesa.Agent):
         if alighting_passengers:
             for passenger in alighting_passengers:
                 self.passengers.remove(passenger)
+                print(f"Passenger {passenger.id} from bus {self.unique_id} alighted at {self.pos}.")
         if boarding_passengers:
             for passenger in boarding_passengers:
                 if len(self.passengers) < self.capacity:
                     self.passengers.append(passenger)
+                    print(f"Passenger {passenger.id} boarded bus {self.unique_id} at {self.pos}.")
                 else:
                     # Handle the case where the bus is full
                     raise Exception("Bus is full, cannot board more passengers.")

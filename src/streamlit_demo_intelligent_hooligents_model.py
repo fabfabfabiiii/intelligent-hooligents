@@ -75,13 +75,13 @@ def create_model(graph_params, model_params):
     passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
-    for i in range(100):
+    for i in range(10):
         person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
                                          Verein.Neutral, current_position='1'))
 
     stadium_node_id = "1"  # todo make this configurable
 
-    #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
+    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(
@@ -252,7 +252,10 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                             line=dict(width=1, color='black')
                         ),
                         name=f"{agent_type} {agent.unique_id}",
-                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + f" Person count: {len(agent.passengers)}" if isinstance(
+                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + (
+                            f" Person count: {len(agent.passengers)}" if isinstance(
+                                agent,
+                                BusAgent) else "") + f"<br> Passengers:<br>{'<br>'.join([str(p.id) + f" with destination {p.zielstation} and Verein {p.verein}" for p in agent.passengers])}" if isinstance(
                             agent, BusAgent) else "",
                         hoverinfo='text'
                     )
@@ -404,7 +407,7 @@ def main():
 
     # Auto-play controls
     auto_play = st.checkbox("Auto-play")
-    interval = st.slider("Step Interval (seconds)", 0.1, 5.0, 1.0)
+    interval = st.slider("Step Interval (seconds)", 0.01, 5.0, 1.0)
 
     if auto_play:
         time.sleep(interval)
