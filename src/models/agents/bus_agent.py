@@ -59,7 +59,7 @@ class BusAgent(mesa.Agent):
         exchangeable_people_at_station = [person for person in self.person_handler.get_people_at_location(self.pos) if
                                           person not in passengers_of_other_busses]
         alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(
-            self.remaining_route, self.capacity, self.passengers, exchangeable_people_at_station)
+            [self.pos] + self.remaining_route, self.capacity, self.passengers, exchangeable_people_at_station)
 
         if alighting_passengers:
             for passenger in alighting_passengers:
