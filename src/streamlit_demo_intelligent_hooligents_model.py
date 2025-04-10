@@ -9,7 +9,8 @@ from collections import defaultdict
 import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
-from models.person import PersonHandler, Person
+from models.person import Person
+from models.person_handler import PersonHandler
 from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel

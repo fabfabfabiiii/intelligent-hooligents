@@ -3,7 +3,8 @@ from mesa import Agent
 from models.abstract import route_calculator
 from models.abstract.route_calculator import RouteCalculator
 from models.agents.bus_agent import BusAgent
-from models.person import Person, PersonHandler
+from models.person import Person
+from models.person_handler import PersonHandler
 
 
 # from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import

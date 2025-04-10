@@ -3,7 +3,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import time
 
-from models.person import PersonHandler
+from models.person_handler import PersonHandler
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
 from models.abstract.route_calculator import RouteCalculator

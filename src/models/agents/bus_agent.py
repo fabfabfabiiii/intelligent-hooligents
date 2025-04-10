@@ -1,8 +1,10 @@
 import mesa
 
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
+from models.action import Action
 # from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
-from models.person import Person, PersonHandler
+from models.person import Person
+from models.person_handler import PersonHandler
 
 
 class BusAgent(mesa.Agent):
@@ -58,9 +60,7 @@ class BusAgent(mesa.Agent):
                                           person not in passengers_of_other_busses]
         alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(
             self.remaining_route, self.capacity, self.passengers, exchangeable_people_at_station)
-        people_staying_in_bus = [passenger for passenger in self.passengers if passenger not in alighting_passengers]
-        people_staying_at_station = [person for person in exchangeable_people_at_station if
-                                     person not in boarding_passengers]
+
         if alighting_passengers:
             for passenger in alighting_passengers:
                 self.passengers.remove(passenger)
@@ -73,3 +73,16 @@ class BusAgent(mesa.Agent):
                 else:
                     # Handle the case where the bus is full
                     raise Exception("Bus is full, cannot board more passengers.")
+
+        self._update_people_satisfactions(alighting_passengers, boarding_passengers, exchangeable_people_at_station)
+
+    def _update_people_satisfactions(self, alighting_passengers: list[Person], boarding_passengers: list[Person],
+                                     exchangeable_people_at_station: list[Person]):
+        people_staying_in_bus = [passenger for passenger in self.passengers if passenger not in alighting_passengers]
+        people_staying_at_station = [person for person in exchangeable_people_at_station if
+                                     person not in boarding_passengers]
+
+        self.person_handler.set_people_actions([(p, Action.EXIT) for p in alighting_passengers])
+        self.person_handler.set_people_actions([(p, Action.ENTRY) for p in boarding_passengers])
+        self.person_handler.set_people_actions([(p, Action.DRIVING) for p in people_staying_in_bus])
+        self.person_handler.set_people_actions([(p, Action.WAITING) for p in people_staying_at_station])

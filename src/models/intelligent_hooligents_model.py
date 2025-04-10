@@ -5,7 +5,7 @@ from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.abstract.route_calculator import RouteCalculator
 from models.agents.bus_agent import BusAgent
 from models.agents.routes_agent import RoutesAgent
-from models.person import PersonHandler
+from models.person_handler import PersonHandler
 from models.streckennetz import Streckennetz
 
 
