@@ -1,5 +1,3 @@
-from enum import Enum
-
 from pyoptinterface import highs
 import pyoptinterface as poi
 
@@ -50,9 +48,9 @@ class TransportOptimization:
         self.log.append("Add Flags")
 
 
-        #Anzahl mitgenommener Personen darf Kapazität nicht überschreiten, Bus muss aber voll sein.
+        #Anzahl mitgenommener Personen darf Kapazität nicht überschreiten
         self.model.add_linear_constraint(
-            poi.quicksum(self.decision_variable_persons), poi.Eq, capacity)
+            poi.quicksum(self.decision_variable_persons), poi.Leq, capacity)
         self.log.append("Add Linear Constraint")
 
         #Kein Team darf in Überzahl sein
@@ -98,8 +96,12 @@ class TransportOptimization:
             poi.Eq, 0)
 
         #mminimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
-        obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
-        self.model.set_objective(obj, poi.ObjectiveSense.Minimize)
+        #obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
+        #neue Optimierung: maximiere nach der Veränderung der mitgenommenen Leute - max_möglich
+        obj = poi.quicksum(self.decision_variable_persons[p] *
+                           (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
+                           for p in persons)
+        self.model.set_objective(obj, poi.ObjectiveSense.Maximize)
         self.log.append("Minimize Route length")
 
         self.is_prepared = True
