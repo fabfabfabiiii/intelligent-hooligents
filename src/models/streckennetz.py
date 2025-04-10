@@ -136,7 +136,7 @@ class Streckennetz:
             x = random.randint(0, width)
             y = random.randint(0, height)
 
-            node_names.append(graph.add_node(f'node_{n + 1}', (x, y)))
+            node_names.append(graph.add_node(f'{n + 1}', (x, y)))
 
         for start, end in itertools.combinations(node_names, 2):
             if random.random() >= edge_probability:
