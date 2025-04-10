@@ -76,9 +76,9 @@ def create_model(graph_params, model_params):
     passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
-    for i in range(10):
+    for i in range(100):
         person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
-                                         Verein.Neutral, current_position='1'))
+                                         random.choice(list(Verein)), current_position='1'))
 
     stadium_node_id = "1"  # todo make this configurable
 

@@ -18,7 +18,7 @@ class IntelligentHooligentsModel(mesa.Model):
         super().__init__()
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
-            agent = BusAgent(self, capacity=10, passenger_exchange_handler=passenger_exchange_handler,
+            agent = BusAgent(self, capacity=20, passenger_exchange_handler=passenger_exchange_handler,
                              person_handler=person_handler, speed=bus_speed)  # todo make capacity configurable
             self.agents.add(agent)
             # noinspection PyTypeChecker
