@@ -80,6 +80,8 @@ def create_model(graph_params, model_params):
         person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
                                          random.choice(list(Verein)), current_position='1'))
 
+    print(f'generate people')
+
     stadium_node_id = "1"  # todo make this configurable
 
     # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
@@ -354,8 +356,19 @@ def _step_callback():
     st.session_state.step_count += 1
     st.rerun()
 
+def _load_config():
+    if "config_loaded" in st.session_state:
+        return
+
+    if config.USE_SEED:
+        print(f'Using seed: {config.SEED}')
+        random.seed(config.SEED)
+
+    st.session_state.config_loaded = True
 
 def main():
+    _load_config()
+
     st.set_page_config(
         page_title="Intelligent Hooligents Model Simulation",
         layout="centered",
