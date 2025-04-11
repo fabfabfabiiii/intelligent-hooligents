@@ -10,12 +10,12 @@ class Action(Enum):
 
     def __str__(self) -> str:
         if self.value == 0:
-            return "Steige ein"
+            return "ENTRY"
         if self.value == 1:
-            return "Steige aus"
+            return "EXIT"
         if self.value == 2:
-            return "warte"
+            return "WAITING"
         if self.value == 3:
-            return "fahre"
+            return "DRIVING"
 
-        return "keine Aktion"
+        return "NO_ACTION"
