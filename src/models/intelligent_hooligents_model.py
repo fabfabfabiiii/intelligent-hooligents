@@ -16,6 +16,7 @@ class IntelligentHooligentsModel(mesa.Model):
                  passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler,
                  num_busses: int = 1, num_people: int = 100, bus_speed: int = 10):
         super().__init__()
+        self.person_handler = person_handler
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
             agent = BusAgent(self, capacity=20, passenger_exchange_handler=passenger_exchange_handler,
@@ -32,5 +33,4 @@ class IntelligentHooligentsModel(mesa.Model):
     def step(self):
         """Advance the model by one step."""
         self.agents.do("step")
-        # personhandler calculate satisfaction
-        # personhandler reset current tick actions
+        self.person_handler.calculate_satisfactions_and_reset_tick_actions()
