@@ -4,7 +4,7 @@ from models.verein import Verein
 class Person:
     _id_counter: int = 0
 
-    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 10,
+    def __init__(self, zielstation: str, verein: str | Verein, zufriedenheit: int = 100,
                  current_position: str = 'Stadion'):
         self.id: int = Person._id_counter
         Person._id_counter += 1
