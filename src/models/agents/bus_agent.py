@@ -1,5 +1,6 @@
 import mesa
 
+import config
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.action import Action
 # from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
@@ -61,11 +62,11 @@ class BusAgent(mesa.Agent):
                 passenger.update_location(self.pos)
 
     def _handle_node_actions(self):
-        other_busses = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
-                        isinstance(agent, BusAgent) and agent.unique_id != self.unique_id]
-        passengers_of_other_busses = [passenger for bus in other_busses for passenger in bus.passengers]
+        busses = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
+                        isinstance(agent, BusAgent)]
+        passengers_of_busses = [passenger for bus in busses for passenger in bus.passengers]
         exchangeable_people_at_station = [person for person in self.person_handler.get_people_at_location(self.pos) if
-                                          person not in passengers_of_other_busses]
+                                          person not in passengers_of_busses]
         alighting_passengers, boarding_passengers = self.passenger_exchange_handler.handle_passenger_exchange(
             [self.pos] + self.remaining_route, self.capacity, self.passengers, exchangeable_people_at_station)
 
@@ -81,6 +82,11 @@ class BusAgent(mesa.Agent):
                 else:
                     # Handle the case where the bus is full
                     raise Exception("Bus is full, cannot board more passengers.")
+
+        if config.DEBUGGING:
+            print('Passengers:')
+            for passenger in self.passengers:
+                print(f"{passenger}")
 
         self._update_people_satisfactions(alighting_passengers, boarding_passengers, exchangeable_people_at_station)
 

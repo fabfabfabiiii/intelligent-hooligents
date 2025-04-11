@@ -12,6 +12,7 @@ PLT_FIGSIZE: tuple[int, int] = (10, 10)
 FONT_SIZE: int = 10
 NODE_SIZE: int = 500
 FONT_WEIGHT: str = 'bold'
+DEBUGGING: bool = False
 
 # Dict to create people
 # {(ziel, verein): anzahl_personen}

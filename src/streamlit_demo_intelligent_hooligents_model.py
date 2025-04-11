@@ -82,7 +82,7 @@ def create_model(graph_params, model_params):
 
     stadium_node_id = "1"  # todo make this configurable
 
-    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
+    #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(

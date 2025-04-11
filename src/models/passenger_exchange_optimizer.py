@@ -1,3 +1,4 @@
+import config
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.optimization.transport_optimization import TransportOptimization
 from models.person import Person
@@ -23,6 +24,30 @@ class PassengerExchangeOptimizer(PassengerExchangeHandler):
         transport_optimization.prepare_optimization(capacity, route, passengers + persons_at_location)
         transport_optimization.solve()
         people_to_transport = transport_optimization.get_result()
+
+        if config.DEBUGGING:
+            print('people_to_transport')
+            for person in people_to_transport:
+                print(person)
+
         boarding_people = [person for person in people_to_transport if person not in passengers]
         alighting_people = [person for person in passengers if person not in people_to_transport]
+
+        if config.DEBUGGING:
+            print(f'Alighting:')
+            for person in alighting_people:
+                print(f'{person}')
+            print(f'Boarding:')
+            for person in boarding_people:
+                print(f'{person}')
+
+            #Personen für die Optimierung:
+            print(f'Personen für Optimierung:')
+            print('in Bus:')
+            for person in passengers:
+                print(f'{person}')
+            print('an Station:')
+            for person in persons_at_location:
+                print(f'{person}')
+
         return alighting_people, boarding_people
