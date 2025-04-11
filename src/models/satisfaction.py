@@ -39,6 +39,10 @@ def calculate_satisfaction(person: Person, action: Action) -> int | None:
         #sinke um den Faktor, wenn dieser mehr als drei Schritte gleich ist
         #ansonsten bleibe gleich
         for i in range(3):
-            if person.zufriedenheit[len(person.zufriedenheit) - (2+i)] != current_satisfaction:
+            index: int = len(person.zufriedenheit) - (2+i)
+            if index < 0 or index >= len(person.zufriedenheit):
+                return current_satisfaction
+
+            if person.zufriedenheit[index] != current_satisfaction:
                 return current_satisfaction
         return current_satisfaction - factor
