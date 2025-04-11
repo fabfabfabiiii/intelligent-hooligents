@@ -3,20 +3,25 @@ import networkx as nx
 
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.abstract.route_calculator import RouteCalculator
+from models.action import Action
 from models.agents.bus_agent import BusAgent
 from models.agents.routes_agent import RoutesAgent
 from models.person_handler import PersonHandler
 from models.streckennetz import Streckennetz
+from models.verein import Verein
 
 
 class IntelligentHooligentsModel(mesa.Model):
     """Intelligent hooligents model."""
 
+    # id: 3, verein: "club_a", ist_angekommen: "yes"/"no", zufriedenheit: [neuerster, 2. neuster, .. 5. neuster]  , action: "DRIVING" | y: 20
     def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: str, route_calculator: RouteCalculator,
                  passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler,
-                 num_busses: int = 1, num_people: int = 100, bus_speed: int = 10):
+                 num_busses: int = 1, num_people: int = 100, bus_speed: int = 10,
+                 ml_data_tracker: list[(int, Verein, bool, list[int], Action, int)] = None):
         super().__init__()
         self.person_handler = person_handler
+        self.ml_data_tracker = ml_data_tracker
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
             agent = BusAgent(self, capacity=20, passenger_exchange_handler=passenger_exchange_handler,
@@ -33,4 +38,7 @@ class IntelligentHooligentsModel(mesa.Model):
     def step(self):
         """Advance the model by one step."""
         self.agents.do("step")
+        for person in self.person_handler.person_current_tick_action.keys():
+            self.ml_data_tracker.append((person.id, person.verein, person.has_arrived(), person.zufriedenheit,
+                                         self.person_handler.person_current_tick_action[person]))
         self.person_handler.calculate_satisfactions_and_reset_tick_actions()
