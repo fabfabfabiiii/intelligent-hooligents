@@ -68,33 +68,68 @@ def _load_model() -> LinearRegression:
 
     return model
 
-def _create_input_data(ist_angekommen: bool) -> pd.DataFrame:
+def _create_input_data(ist_angekommen: bool, verein: Verein, action: Action, satisfaction: list[int]) -> pd.DataFrame:
+    verein_a: int = 0
+    verein_b: int = 0
+    verein_neutral: int = 0
+
+    if verein == Verein.Club_A:
+        verein_a = 1
+    elif verein == Verein.Club_B:
+        verein_b = 1
+    else:
+        verein_neutral = 1
+
+    action_driving: int = 0
+    action_entry: int = 0
+    action_waiting: int = 0
+    action_exit: int = 0
+
+    if action == action.DRIVING:
+        action_driving = 1
+    elif action == action.ENTRY:
+        action_entry = 1
+    elif action == action.WAITING:
+        action_waiting = 1
+    elif action == action.EXIT:
+        action_exit = 1
+
     #reihenfolge der Werte ist wichtig, da diese input für ml model
     input_data: pd.DataFrame = pd.DataFrame({
         'ist_angekommen': [1 if ist_angekommen else 0],
-        'zufriedenheit_1': [100],
-        'zufriedenheit_2': [100],
-        'zufriedenheit_3': [100],
-        'zufriedenheit_4': [100],
-        'zufriedenheit_5': [100],
-        'verein_Club A': [1],
-        'verein_Club B': [0],
-        'verein_Neutral': [0],
+        'zufriedenheit_1': [satisfaction[0]],
+        'zufriedenheit_2': [satisfaction[1]],
+        'zufriedenheit_3': [satisfaction[2]],
+        'zufriedenheit_4': [satisfaction[3]],
+        'zufriedenheit_5': [satisfaction[4]],
+        'verein_Club A': [verein_a],
+        'verein_Club B': [verein_b],
+        'verein_Neutral': [verein_neutral],
         #TODO implement ENTRY after updating ml model
-        'action_DRIVING': [0],
-        'action_EXIT': [1],
-        'action_WAITING': [0],
+        'action_DRIVING': [action_driving],
+        'action_EXIT': [action_exit],
+        'action_WAITING': [action_waiting],
     })
 
     return input_data
 
 #this function uses a ml model to predict the satisfaction of an person
-def predict_satisfaction(verein: Verein, satisfaction: list[int], ist_angekommen: True,action: Action) -> int:
+def predict_satisfaction(verein: Verein, satisfaction: list[int], ist_angekommen: True, action: Action) -> int:
     ml_model: LinearRegression = _load_model()
 
-    input_data: pd.DataFrame = _create_input_data(ist_angekommen)
+    satisfaction_list: list[int] = [-1,-1,-1,-1,-1]
+
+    length = len(satisfaction)
+    for i in range(5):
+        index: int = length - i - 1
+        if index < 0 or index >= len(satisfaction):
+            break
+
+        satisfaction_list[4-i] = satisfaction[index]
+
+    input_data: pd.DataFrame = _create_input_data(ist_angekommen, verein, action, satisfaction_list)
     df = pd.DataFrame(input_data)
 
-    prediction = model.predict(df)
+    prediction = ml_model.predict(df)
 
     return int(prediction)
