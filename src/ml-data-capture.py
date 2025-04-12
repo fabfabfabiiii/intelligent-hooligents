@@ -61,7 +61,7 @@ def main():
 
     action_history = []
 
-    for j in range(30):
+    for j in range(1):
         # Define graph parameters
         graph_params = GraphParams(num_nodes=30, edge_probability=60, width=100, height=100)
         num_busses = 3
@@ -77,11 +77,12 @@ def main():
             current_action_values.clear()
 
     # id: 3, verein: "club_a", ist_angekommen: "yes"/"no", zufriedenheit: [neuerster, 2. neuster, .. 5. neuster]  , action: "DRIVING" | y: 20
-    action_csv = "id,verein,ist_angekommen,zufriedenheit,action,y\r\n"
+    action_csv = "id,verein,ist_angekommen,zufriedenheit_1,zufriedenheit_2,zufriedenheit_3,zufriedenheit_4,zufriedenheit_5,action,y\n"
 
     for current_item in action_history:
         # format csv
-        action_csv += f"{current_item[0]},{current_item[1]},{current_item[2]},[{','.join(map(str, current_item[3]))}],{current_item[4]},{current_item[5]}\r\n"
+        parts_satisfaction = ','.join(map(str, current_item[3]))
+        action_csv += f"{current_item[0]},{current_item[1]},{current_item[2]},{parts_satisfaction},{current_item[4]},{current_item[5]}\n"
 
     # Write the CSV data to a file
     with open("ml_data.csv", "w") as file:
