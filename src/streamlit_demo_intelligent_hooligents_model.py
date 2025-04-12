@@ -145,7 +145,7 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                 agent_type = type(agent).__name__
                 agent_info += f"- {agent_type} (ID: {agent.unique_id})<br>"
         # get all people on the node and exclude the passengers of the bus on the current node
-        people_at_location = [person for person in model.person_handler.get_people_at_location(node, include_arrived_people=True) if person not in all_passengers]
+        people_at_location = [person for person in model.person_handler.get_people_at_location(node, include_arrived_people=False) if person not in all_passengers]
         people_text = ""
         if people_at_location:
             people_text = "<br>People at this location:<br>"
