@@ -1,6 +1,7 @@
 from models.verein import Verein
 
 GRAPHML_PATH: str = "../resources/20250408_Verkehrsnetz.graphml"
+ML_MODEL_PATH: str = "../resources/satisfaction_model.pkl"
 USE_SEED: bool = True
 SEED: int = 127456981
 # Graph Visualization
