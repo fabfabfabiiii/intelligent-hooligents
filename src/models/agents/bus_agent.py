@@ -92,7 +92,7 @@ class BusAgent(mesa.Agent):
 
     def _update_people_satisfactions(self, alighting_passengers: list[Person], boarding_passengers: list[Person],
                                      exchangeable_people_at_station: list[Person]):
-        people_staying_in_bus = [passenger for passenger in self.passengers if passenger not in alighting_passengers]
+        people_staying_in_bus = [passenger for passenger in self.passengers if passenger not in boarding_passengers]
         people_staying_at_station = [person for person in exchangeable_people_at_station if
                                      person not in boarding_passengers]
 
