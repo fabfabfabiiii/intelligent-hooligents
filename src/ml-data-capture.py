@@ -61,7 +61,7 @@ def main():
 
     action_history = []
 
-    for j in range(1):
+    for j in range(30):
         # Define graph parameters
         graph_params = GraphParams(num_nodes=30, edge_probability=60, width=100, height=100)
         num_busses = 3
