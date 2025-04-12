@@ -5,7 +5,7 @@ from models.person import Person
 from models.streckennetz import Streckennetz
 from models.verein import Verein
 
-class TransportOptimization:
+class MLTransportOptimization:
     #ich glaube, es sollte unbedingt der gesamte Graph und kein Teilgraph übergeben werden
     def __init__(self, graph: Streckennetz):
         self.log: list[str] = []
@@ -17,6 +17,8 @@ class TransportOptimization:
         self.is_prepared: bool = False
         self.model = highs.Model()
 
+        #key: person_id, values: (satisfaction_mitnahme, satisfaction_waiting)
+        self.satisfaction: dict[int, tuple[int, int]] = {}
         #index: index of persons
         #(distance now, distance next_step, shortest_distance), -1 if unavailable
         self.distance_matrix: dict[Person, tuple[int, int, int]] = {}
@@ -25,7 +27,9 @@ class TransportOptimization:
         self.flag_no_team_a = None
         self.flag_no_team_b = None
 
-    def prepare_optimization(self, capacity: int, stations: list[str], persons: list[Person]) -> bool:
+        self.optimization_maximum: int = 0
+
+    def prepare_optimization(self, capacity: int, stations: list[str], persons: list[Person], satisfaction: dict[int, tuple[int, int]], optimized_maximum: int) -> bool:
         if self.is_optimized:
             self.log.append('Already optimized. Can\'t prepare optimization again')
             return False
@@ -38,6 +42,13 @@ class TransportOptimization:
 
         self.persons = persons
         self.distance_matrix = self._create_distance_matrix(self.graph, stations, persons)
+        self.satisfaction = satisfaction
+
+        for person in self.persons:
+            if self.satisfaction[person.id]:
+                self.satisfaction[person.id] = (0, 0)
+
+        self.optimization_maximum = optimized_maximum
 
         self.decision_variable_persons = self.model.add_variables(persons, domain=poi.VariableDomain.Binary)
         self.log.append("Add Decision Variables")
@@ -95,17 +106,20 @@ class TransportOptimization:
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == -1),
             poi.Eq, 0)
 
-        #mminimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
-        #obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
-        #neue Optimierung: maximiere nach der Veränderung der mitgenommenen Leute - max_möglich
-        #obj = poi.quicksum(self.decision_variable_persons[p] *
-        #                   (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
-        #                   for p in persons)
-        obj = poi.quicksum(self.decision_variable_persons[p] *
-                           (self.distance_matrix[p][0] - self.distance_matrix[p][2])
-                           for p in persons)
+        #Optimierung darf maximal 10 Prozent schlechter sein als Optimum
+        #muss das sein, wonach im normalen optimiert wird
+        self.model.add_linear_constraint(
+            poi.quicksum(self.decision_variable_persons[p] *
+                         (self.distance_matrix[p][0] - self.distance_matrix[p][2])
+            for p in persons),
+            poi.Geq, int(self.optimization_maximum * 0.9))
+
+        #Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
+        obj = poi.quicksum(self.decision_variable_persons[p] * self.satisfaction[p.id][0] +
+                          self.decision_variable_persons[p] * self.satisfaction[p.id][1]
+                          for p in persons)
         self.model.set_objective(obj, poi.ObjectiveSense.Maximize)
-        self.log.append("Minimize Route length")
+        self.log.append("Maximize Satisfaction")
 
         self.is_prepared = True
         return True
@@ -135,23 +149,6 @@ class TransportOptimization:
             self.decision_variable_persons[p], poi.VariableAttribute.Value) > 0.9]
 
         return persons_to_transport
-
-    def get_optimization_value(self) -> int | None:
-        if not self.is_optimized or not self.is_prepared:
-            self.log.append("No result available. Please solve the optimization first")
-            return None
-
-        transported_people: list[Person] = [person for person in self.persons if self.model.get_variable_attribute(
-            self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]
-
-        value: int = 0
-        for person in [person for person in self.persons if self.model.get_variable_attribute(
-                self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]:
-
-            #muss ggf angepasst werden, wenn optimierungsfkt nochmal geändert wird
-            value += self.distance_matrix[person][0] - self.distance_matrix[person][2]
-
-        return value
 
     @staticmethod
     def _create_distance_matrix(graph: Streckennetz, stations: list, persons: list[Person]) -> dict[Person, tuple[int, int, int]]:
@@ -185,7 +182,7 @@ class TransportOptimization:
                     shortest_value = calculated_distances[(station, person.zielstation)]
 
             distance_matrix[person] = ((calculated_distances[(current_station, person.zielstation)],
-                                    calculated_distances[(next_station, person.zielstation)],
-                                    shortest_value))
+                                        calculated_distances[(next_station, person.zielstation)],
+                                        shortest_value))
 
         return distance_matrix
