@@ -125,6 +125,10 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
     node_y = []
     node_text = []
     node_ids = []  # Store node IDs for labels
+    all_passengers = []
+    for agent in model.agents:
+        if isinstance(agent, BusAgent):
+            all_passengers += agent.passengers
 
     for node in G.nodes():
         x, y = pos[node]
@@ -140,7 +144,14 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
             for agent in agents_at_node:
                 agent_type = type(agent).__name__
                 agent_info += f"- {agent_type} (ID: {agent.unique_id})<br>"
-        node_text.append(f"Node: {node}{agent_info}")
+        # get all people on the node and exclude the passengers of the bus on the current node
+        people_at_location = [person for person in model.person_handler.get_people_at_location(node, include_arrived_people=True) if person not in all_passengers]
+        people_text = ""
+        if people_at_location:
+            people_text = "<br>People at this location:<br>"
+            for person in people_at_location:
+                people_text += f"{person.id} - {person.verein} - {person.get_current_zufriedenheit()} -> {person.zielstation}<br>"
+        node_text.append(f"Node: {node}{agent_info}{people_text}")
 
     # Create node trace
     node_trace = go.Scatter(
@@ -234,39 +245,40 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                 radius = 0.05
 
                 for i, agent in enumerate(agents):
-                    # Position agents in a circle around the node
-                    angle = (2 * np.pi * i) / max(1, len(agents))
-                    offset_x = radius * np.cos(angle)
-                    offset_y = radius * np.sin(angle)
+                    # Hide RouteAgent in visualization
+                    if isinstance(agent, BusAgent):
+                        # Position agents in a circle around the node
+                        angle = (2 * np.pi * i) / max(1, len(agents))
+                        offset_x = radius * np.cos(angle)
+                        offset_y = radius * np.sin(angle)
 
-                    agent_color = color_map.get(agent.unique_id, 'red')
-                    agent_type = type(agent).__name__
+                        agent_color = color_map.get(agent.unique_id, 'red')
+                        agent_type = type(agent).__name__
 
-                    agent_trace = go.Scatter(
-                        x=[center_x + offset_x],
-                        y=[center_y + offset_y],
-                        mode='markers',
-                        marker=dict(
-                            color=agent_color,
-                            size=15,
-                            symbol='circle',
-                            line=dict(width=1, color='black')
-                        ),
-                        name=f"{agent_type} {agent.unique_id}",
-                        text=f"{agent_type}<br>ID: {agent.unique_id}<br>Position: {agent.pos}" + (
-                            f" Person count: {len(agent.passengers)}" if isinstance(
-                                agent,
-                                BusAgent) else "") + f"<br> Passengers:<br>{'<br>'.join([str(p.id) + f" with destination {p.zielstation} and Verein {p.verein}" for p in agent.passengers])}" if isinstance(
-                            agent, BusAgent) else "",
-                        hoverinfo='text'
-                    )
-                    agent_traces.append(agent_trace)
+                        agent_trace = go.Scatter(
+                            x=[center_x + offset_x],
+                            y=[center_y + offset_y],
+                            mode='markers',
+                            marker=dict(
+                                color=agent_color,
+                                size=15,
+                                symbol='circle',
+                                line=dict(width=1, color='black')
+                            ),
+                            name=f"{agent_type} {agent.unique_id}",
+                            text=f"{agent_type}<br>ID: {agent.unique_id}<br>"
+                                 f"Position: {agent.pos}<br>"
+                                 f"Person count: {len(agent.passengers)}<br>"
+                                 f"Passengers:<br>{'<br>'.join([str(p.id) + f" with destination {p.zielstation} and Verein {p.verein}" for p in agent.passengers])}",
+                            hoverinfo='text'
+                        )
+                        agent_traces.append(agent_trace)
 
     # Create route traces if enabled
     route_traces = []
     if show_routes:
         # Get all bus agents from the model
-        bus_agents = [agent for agent in model.agents if type(agent).__name__ == BusAgent.__name__]
+        bus_agents = [agent for agent in model.agents if isinstance(agent, BusAgent)]
 
         # Get the color map for agents
         agent_ids = [agent.unique_id for agent in model.agents if hasattr(agent, 'pos')]
@@ -310,7 +322,7 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
         # data=[node_trace, node_label_trace] + edge_traces + agent_traces + route_traces,
         data=edge_traces + route_traces + [node_trace, node_label_trace] + agent_traces,
         layout=go.Layout(
-            title="Intelligent Hooligents Model Visualization",
+            title=f"Intelligent Hooligents Model Visualization",
             titlefont=dict(size=16),
             showlegend=True,
             hovermode='closest',
@@ -349,6 +361,7 @@ def _step_callback():
         'xaxis.range': None,
         'yaxis.range': None
     })
+
     # Step the model
     st.session_state.model.step()
     st.session_state.step_count += 1
@@ -400,17 +413,20 @@ def main():
     # Step controls
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("Step"):
+        if st.button("Step") and len(st.session_state.model.person_handler.remaining_people()) > 0:
             _step_callback()
 
     with col2:
         st.write(f"Current Step: {st.session_state.step_count}")
+        st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction()}")
+        if len(st.session_state.model.person_handler.remaining_people()) == 0:
+            st.write(f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
 
     # Auto-play controls
     auto_play = st.checkbox("Auto-play")
     interval = st.slider("Step Interval (seconds)", 0.01, 5.0, 1.0)
 
-    if auto_play:
+    if auto_play and len(st.session_state.model.person_handler.remaining_people()) > 0:
         time.sleep(interval)
         _step_callback()
 
