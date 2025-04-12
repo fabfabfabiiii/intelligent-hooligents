@@ -132,4 +132,7 @@ def predict_satisfaction(verein: Verein, satisfaction: list[int], ist_angekommen
 
     prediction = ml_model.predict(df)
 
+    if config.DEBUGGING:
+        print(f'Predicted satisfaction: {prediction}')
+
     return int(prediction)
