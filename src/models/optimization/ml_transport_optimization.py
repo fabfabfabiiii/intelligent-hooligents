@@ -17,6 +17,8 @@ class MLTransportOptimization:
         self.is_prepared: bool = False
         self.model = highs.Model()
 
+        #key: person_id, values: (satisfaction_mitnahme, satisfaction_waiting)
+        self.satisfaction: dict[int, tuple[int, int]] = {}
         #index: index of persons
         #(distance now, distance next_step, shortest_distance), -1 if unavailable
         self.distance_matrix: dict[Person, tuple[int, int, int]] = {}
@@ -25,7 +27,9 @@ class MLTransportOptimization:
         self.flag_no_team_a = None
         self.flag_no_team_b = None
 
-    def prepare_optimization(self, capacity: int, stations: list[str], persons: list[Person]) -> bool:
+        self.optimization_maximum: int = 0
+
+    def prepare_optimization(self, capacity: int, stations: list[str], persons: list[Person], satisfaction: dict[int, tuple[int, int]], optimized_maximum: int) -> bool:
         if self.is_optimized:
             self.log.append('Already optimized. Can\'t prepare optimization again')
             return False
@@ -38,6 +42,13 @@ class MLTransportOptimization:
 
         self.persons = persons
         self.distance_matrix = self._create_distance_matrix(self.graph, stations, persons)
+        self.satisfaction = satisfaction
+
+        for person in self.persons:
+            if self.satisfaction[person.id]:
+                self.satisfaction[person.id] = (0, 0)
+
+        self.optimization_maximum = optimized_maximum
 
         self.decision_variable_persons = self.model.add_variables(persons, domain=poi.VariableDomain.Binary)
         self.log.append("Add Decision Variables")
@@ -95,14 +106,20 @@ class MLTransportOptimization:
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == -1),
             poi.Eq, 0)
 
-        #mminimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
-        #obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
-        #neue Optimierung: maximiere nach der Veränderung der mitgenommenen Leute - max_möglich
-        obj = poi.quicksum(self.decision_variable_persons[p] *
-                           (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
-                           for p in persons)
+        #Optimierung darf maximal 10 Prozent schlechter sein als Optimum
+        #muss das sein, wonach im normalen optimiert wird
+        self.model.add_linear_constraint(
+            poi.quicksum(self.decision_variable_persons[p] *
+                         (self.distance_matrix[p][0] - self.distance_matrix[p][2])
+            for p in persons),
+            poi.Geq, int(self.optimization_maximum * 0.9))
+
+        #Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
+        obj = poi.quicksum(self.decision_variable_persons[p] * self.satisfaction[p.id][0] +
+                          self.decision_variable_persons[p] * self.satisfaction[p.id][1]
+                          for p in persons)
         self.model.set_objective(obj, poi.ObjectiveSense.Maximize)
-        self.log.append("Minimize Route length")
+        self.log.append("Maximize Satisfaction")
 
         self.is_prepared = True
         return True
