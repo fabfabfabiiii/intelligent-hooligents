@@ -116,7 +116,7 @@ class MLTransportOptimization:
 
         #Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
         obj = poi.quicksum(self.decision_variable_persons[p] * self.satisfaction[p.id][0] +
-                          self.decision_variable_persons[p] * self.satisfaction[p.id][1]
+                           (1 - self.decision_variable_persons[p]) * self.satisfaction[p.id][1]
                           for p in persons)
         self.model.set_objective(obj, poi.ObjectiveSense.Maximize)
         self.log.append("Maximize Satisfaction")

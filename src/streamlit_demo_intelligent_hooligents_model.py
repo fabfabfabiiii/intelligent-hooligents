@@ -9,6 +9,7 @@ from collections import defaultdict
 import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
+from models.ml_passenger_exchange_handler import MLPassengerExchangeHandler
 from models.person import Person
 from models.person_handler import PersonHandler
 from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
@@ -61,7 +62,7 @@ class DummyPassengerExchangeHandler(PassengerExchangeHandler):
         return [], []
 
 
-def create_model(graph_params, model_params):
+def create_model(graph_params, model_params, ml_mode: bool = False):
     # Create Streckennetz
     streckennetz = Streckennetz.create_graph(
         graph_params["num_nodes"],
@@ -73,7 +74,7 @@ def create_model(graph_params, model_params):
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
-    passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
+    passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
     for i in range(model_params["num_people"]):
@@ -387,14 +388,14 @@ def main():
     model_params = {
         "num_busses": st.sidebar.slider("Number of Buses", 1, 20, 3),
         "num_people": st.sidebar.slider("Number of People", 10, 500, 100),
-        "bus_capacity": st.sidebar.slider("Bus Capacity", 5, 100, 10),
+        "bus_capacity": st.sidebar.slider("Bus Capacity", 5, 100, 20),
         "bus_speed": st.sidebar.slider("Bus Speed", 1, 100, 20)
     }
 
     # Initialize or regenerate the model
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
-            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params)
+            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=False)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
