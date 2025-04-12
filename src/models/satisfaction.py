@@ -105,8 +105,8 @@ def _create_input_data(ist_angekommen: bool, verein: Verein, action: Action, sat
         'verein_Club A': [verein_a],
         'verein_Club B': [verein_b],
         'verein_Neutral': [verein_neutral],
-        #TODO implement ENTRY after updating ml model
         'action_DRIVING': [action_driving],
+        'action_ENTRY': [action_entry],
         'action_EXIT': [action_exit],
         'action_WAITING': [action_waiting],
     })
