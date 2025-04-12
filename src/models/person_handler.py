@@ -13,7 +13,7 @@ class PersonHandler:
         if people is None:
             return
 
-        if people is isinstance(people, list):
+        if isinstance(people, list):
             for person in people:
                 self.add_person(person)
 
@@ -83,3 +83,6 @@ class PersonHandler:
         for person, action in self.person_current_tick_action.items():
             person.update_zufriedenheit(calculate_satisfaction(person, action))
         self.person_current_tick_action = {}
+
+    def remaining_people(self):
+        return [person for person in self.people if not person.has_arrived()]

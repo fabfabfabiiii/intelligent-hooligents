@@ -98,8 +98,11 @@ class TransportOptimization:
         #mminimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
         #obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
         #neue Optimierung: maximiere nach der Veränderung der mitgenommenen Leute - max_möglich
+        #obj = poi.quicksum(self.decision_variable_persons[p] *
+        #                   (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
+        #                   for p in persons)
         obj = poi.quicksum(self.decision_variable_persons[p] *
-                           (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
+                           (self.distance_matrix[p][0] - self.distance_matrix[p][2])
                            for p in persons)
         self.model.set_objective(obj, poi.ObjectiveSense.Maximize)
         self.log.append("Minimize Route length")
