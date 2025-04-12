@@ -58,46 +58,27 @@ def create_model(graph_params: GraphParams, num_busses: int, num_people: int, bu
 def main():
     action_history = []
 
-    for j in range(1):
+    for j in range(30):
         # Define graph parameters
         graph_params = GraphParams(num_nodes=30, edge_probability=60, width=100, height=100)
         num_busses = 3
-        num_people = 100
+        num_people = 200
         bus_speed = 10
         current_action_values = []
         model = create_model(graph_params, num_busses, num_people, bus_speed, current_action_values)
 
-        for i in range(10):
+        for i in range(200):
             model.step()
             if current_action_values:
                 action_history += current_action_values
-            current_action_values = None
+            current_action_values.clear()
 
     # id: 3, verein: "club_a", ist_angekommen: "yes"/"no", zufriedenheit: [neuerster, 2. neuster, .. 5. neuster]  , action: "DRIVING" | y: 20
     action_csv = "id,verein,ist_angekommen,zufriedenheit,action,y\r\n"
 
-    for i in range(len(action_history)):
-        current_item = action_history[i]
-        # Extract satisfaction values from the last 5 entries (including current)
-        satisfactions = []
-
-        # Get the current satisfaction value
-        current_satisfaction = current_item[3][0] if current_item[3] else -1
-
-        # Look back up to 4 previous entries to get their satisfaction values
-        for j in range(1, 5):
-            if i - j >= 0 and action_history[i - j][3]:
-                satisfactions.append(action_history[i - j][3][0])
-            else:
-                satisfactions.append(-1)
-
-        # Combine current and historical satisfaction values (newest first)
-        all_satisfactions = [current_satisfaction] + satisfactions
-
-        # Format the CSV row
-        action_csv += f"{current_item[0]},{current_item[1]},{current_item[2]}," \
-                      f"{all_satisfactions[0]},{all_satisfactions[1]},{all_satisfactions[2]}," \
-                      f"{all_satisfactions[3]},{all_satisfactions[4]},{current_item[4]},{current_item[5]}\r\n"
+    for current_item in action_history:
+        # format csv
+        action_csv += f"{current_item[0]},{current_item[1]},{current_item[2]},[{','.join(map(str, current_item[3]))}],{current_item[4]},{current_item[5]}\r\n"
 
     # Write the CSV data to a file
     with open("ml_data.csv", "w") as file:
