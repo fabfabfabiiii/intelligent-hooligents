@@ -393,9 +393,10 @@ def main():
     }
 
     # Initialize or regenerate the model
+    ml_mode = st.sidebar.checkbox("ML Mode")
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
-            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=False)
+            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=ml_mode)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
