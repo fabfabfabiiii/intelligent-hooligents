@@ -1,6 +1,7 @@
 import random
 import time
 
+import config
 from models.action import Action
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
@@ -56,6 +57,8 @@ def create_model(graph_params: GraphParams, num_busses: int, num_people: int, bu
 
 
 def main():
+    random.seed(config.SEED)
+
     action_history = []
 
     for j in range(30):
