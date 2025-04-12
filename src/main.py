@@ -1,11 +1,9 @@
 import random
-
 import config
-from models.graph_reader import read_graphml
-from models.optimization.transport_optimization import TransportOptimization
-from models.person import Person, Verein
-from models.visualization import draw_graph
-from models.streckennetz import Streckennetz
+from models.action import Action
+from models.verein import Verein
+
+from src.models.satisfaction import predict_satisfaction
 
 def load_config():
     if config.USE_SEED:
@@ -17,8 +15,9 @@ def main():
 
     print('Intelligent Agents')
 
-    graph: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
-    #draw_graph(graph)
+    prediction = predict_satisfaction(Verein.Club_A, [1,2], False, Action.EXIT)
+
+    print(f'Prediction: {prediction}')
     
 if __name__ == '__main__':
     main()
