@@ -14,12 +14,12 @@ class IntelligentHooligentsModel(mesa.Model):
 
     def __init__(self, graph: Streckennetz | nx.Graph, stadium_node_id: str, route_calculator: RouteCalculator,
                  passenger_exchange_handler: PassengerExchangeHandler, person_handler: PersonHandler,
-                 num_busses: int = 1, num_people: int = 100, bus_speed: int = 10):
+                 num_busses: int = 1, bus_speed: int = 10, bus_capacity: int = 20):
         super().__init__()
         self.person_handler = person_handler
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
-            agent = BusAgent(self, capacity=20, passenger_exchange_handler=passenger_exchange_handler,
+            agent = BusAgent(self, capacity=bus_capacity, passenger_exchange_handler=passenger_exchange_handler,
                              person_handler=person_handler, speed=bus_speed)  # todo make capacity configurable
             self.agents.add(agent)
             # noinspection PyTypeChecker
