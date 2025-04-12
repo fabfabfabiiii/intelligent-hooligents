@@ -76,7 +76,7 @@ def create_model(graph_params, model_params):
     passenger_exchange_handler = PassengerExchangeOptimizer(streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
-    for i in range(100):
+    for i in range(model_params["num_people"]):
         person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
                                          random.choice(list(Verein)), current_position='1'))
 
@@ -92,8 +92,8 @@ def create_model(graph_params, model_params):
         passenger_exchange_handler=passenger_exchange_handler,
         person_handler=person_handler,  # TODO: people initialization
         num_busses=model_params["num_busses"],
-        num_people=model_params["num_people"],
         bus_speed=model_params["bus_speed"],
+        bus_capacity=model_params["bus_capacity"]
     )
 
     return model, streckennetz
