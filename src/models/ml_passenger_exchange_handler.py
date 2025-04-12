@@ -1,7 +1,11 @@
 import config
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
+from models.action import Action
+from models.optimization.transport_optimization import TransportOptimization
+from models.optimization.ml_transport_optimization import MLTransportOptimization
 from models.person import Person
 from models.streckennetz import Streckennetz
+from models.satisfaction import predict_satisfaction
 
 
 class MLPassengerExchangeHandler(PassengerExchangeHandler):
@@ -25,7 +29,46 @@ class MLPassengerExchangeHandler(PassengerExchangeHandler):
 
         transport_optimization.prepare_optimization(capacity, route, passengers + persons_at_location)
         transport_optimization.solve()
-        people_to_transport = transport_optimization.get_result()
+
+        optimization_maximum: int = transport_optimization.get_optimization_value()
+
+
+        predicted_satisfaction: dict[int, tuple[int, int]] = {}
+        current_station: str = route[0]
+        next_station: str = route[1]
+        #Passenger: mitnahme -> DRIVING, keine Mitnahme -> EXIT
+        for person in passengers:
+            driving: int = predict_satisfaction(person.verein, person.zufriedenheit,
+                                                    person.zielstation == next_station,
+                                                    Action.DRIVING)
+
+            #langer name, weil exit reserviertes wort
+            satisfaction_exit: int = predict_satisfaction(person.verein, person.zufriedenheit,
+                                                person.zielstation == current_station,
+                                                Action.EXIT)
+
+            predicted_satisfaction[person.id] = (driving, satisfaction_exit)
+
+        #Wartende: mitnahme -> ENTRY, keine Mitnahme -> WAITING
+        for person in persons_at_location:
+            entry: int = predict_satisfaction(person.verein, person.zufriedenheit,
+                                                person.zielstation == next_station,
+                                                Action.ENTRY)
+
+            #langer name, weil exit reserviertes wort
+            waiting: int = predict_satisfaction(person.verein, person.zufriedenheit,
+                                                person.zielstation == current_station,
+                                                Action.WAITING)
+
+            predicted_satisfaction[person.id] = (entry, waiting)
+
+
+        ml_optimization = MLTransportOptimization(self.streckennetz)
+        ml_optimization.prepare_optimization(capacity, route, passengers + persons_at_location,
+                                                       predicted_satisfaction, optimization_maximum)
+
+        ml_optimization.solve()
+        people_to_transport = ml_optimization.get_result()
 
         if config.DEBUGGING:
             print('people_to_transport')

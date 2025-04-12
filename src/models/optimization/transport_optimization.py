@@ -133,6 +133,23 @@ class TransportOptimization:
 
         return persons_to_transport
 
+    def get_optimization_value(self) -> int | None:
+        if not self.is_optimized or not self.is_prepared:
+            self.log.append("No result available. Please solve the optimization first")
+            return None
+
+        transported_people: list[Person] = [person for person in self.persons if self.model.get_variable_attribute(
+            self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]
+
+        value: int = 0
+        for person in [person for person in self.persons if self.model.get_variable_attribute(
+                self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]:
+
+            #muss ggf angepasst werden, wenn optimierungsfkt nochmal geändert wird
+            value += self.distance_matrix[person][0] - self.distance_matrix[person][2]
+
+        return value
+
     @staticmethod
     def _create_distance_matrix(graph: Streckennetz, stations: list, persons: list[Person]) -> dict[Person, tuple[int, int, int]]:
         current_station: str = stations[0]
