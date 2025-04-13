@@ -45,7 +45,7 @@ class MLTransportOptimization:
         self.satisfaction = satisfaction
 
         for person in self.persons:
-            if self.satisfaction[person.id]:
+            if not self.satisfaction[person.id]:
                 self.satisfaction[person.id] = (0, 0)
 
         self.optimization_maximum = optimized_maximum
