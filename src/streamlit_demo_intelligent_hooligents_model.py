@@ -87,7 +87,8 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
-    passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
+    passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(
+        streckennetz)
     person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
 
     for i in range(model_params["num_people"]):
@@ -96,7 +97,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
 
     stadium_node_id = "1"  # todo make this configurable
 
-    #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
+    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(
@@ -104,7 +105,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
         stadium_node_id=stadium_node_id,
         route_calculator=route_calculator,
         passenger_exchange_handler=passenger_exchange_handler,
-        person_handler=person_handler, # TODO: people initialization
+        person_handler=person_handler,  # TODO: people initialization
         num_busses=model_params["num_busses"],
         bus_speed=model_params["bus_speed"],
         bus_capacity=model_params["bus_capacity"]
@@ -159,7 +160,9 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                 agent_type = type(agent).__name__
                 agent_info += f"- {agent_type} (ID: {agent.unique_id})<br>"
         # get all people on the node and exclude the passengers of the bus on the current node
-        people_at_location = [person for person in model.person_handler.get_people_at_location(node, include_arrived_people=False) if person not in all_passengers]
+        people_at_location = [person for person in
+                              model.person_handler.get_people_at_location(node, include_arrived_people=False) if
+                              person not in all_passengers]
         people_text = ""
         if people_at_location:
             people_text = "<br>People at this location:<br>"
@@ -381,6 +384,7 @@ def _step_callback():
     st.session_state.step_count += 1
     st.rerun()
 
+
 def _load_config():
     if "config_loaded" in st.session_state:
         return
@@ -390,6 +394,7 @@ def _load_config():
         random.seed(config.SEED)
 
     st.session_state.config_loaded = True
+
 
 def main():
     _load_config()
@@ -420,19 +425,23 @@ def main():
     ml_mode = st.sidebar.checkbox("ML Mode")
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
-            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=ml_mode)
-            st.session_state.state = copy.deepcopy(st.session_state)
+            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params,
+                                                                                 ml_mode=ml_mode)
+            st.session_state.model_copy = copy.deepcopy(st.session_state.model)
+            st.session_state.streckennetz_copy = copy.deepcopy(st.session_state.streckennetz)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
-            #print(st.session_state.model)
+            # print(st.session_state.model)
 
     if st.sidebar.button("Reset Model"):
         print("Test")
-        st.session_state = st.session_state.state
-        #print(st.session_state.model)
+        st.session_state.model = copy.deepcopy(st.session_state.model_copy)
+        st.session_state.streckennetz = copy.deepcopy(st.session_state.streckennetz_copy)
+        # print(st.session_state.model)
         st.session_state.step_count = 0
-        st.session_state.model.passenger_exchange_handler = MLPassengerExchangeHandler(st.session_state.streckennetz) if ml_mode else PassengerExchangeOptimizer(st.session_state.streckennetz)
+        st.session_state.model.passenger_exchange_handler = MLPassengerExchangeHandler(
+            st.session_state.streckennetz) if ml_mode else PassengerExchangeOptimizer(st.session_state.streckennetz)
         st.rerun()
 
     # Display visualization options
@@ -455,7 +464,8 @@ def main():
         st.write(f"Current Step: {st.session_state.step_count}")
         st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction()}")
         if len(st.session_state.model.person_handler.remaining_people()) == 0:
-            st.write(f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
+            st.write(
+                f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
 
     # Auto-play controls
     auto_play = st.checkbox("Auto-play")
