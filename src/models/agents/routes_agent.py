@@ -18,7 +18,7 @@ class RoutesAgent(Agent):
         self.person_handler: PersonHandler = person_handler
         self.bus_stations: dict[int, list[str]] = {}
 
-    def _get_mandatory_nodes(self, bus_capacity: int) -> list[str] | None:
+    def _get_mandatory_nodes(self, bus_capacity: int) -> tuple[list[str], list[str]] | None:
         """
         Returns a list of mandatory nodes for the route calculation.
         """
@@ -26,19 +26,24 @@ class RoutesAgent(Agent):
         dict_start = self._get_stations_start()
 
         amount: int = 0
-        stations: list[str] = []
+        stations_pickup: list[str] = []
 
         while amount < bus_capacity and dict_start:
             station_max: str = max(dict_start, key=dict_start.get)
             amount += dict_start[station_max]
-            stations.append(station_max)
+            stations_pickup.append(station_max)
             dict_start.pop(station_max)
 
         amount: int = 0
 
-        dict_end = self._get_end_stations_for_persons_at(stations)
+        dict_end = self._get_end_stations_for_persons_at(stations_pickup)
 
-        # 2 ist ein placeholder, ich denke es ist besser wenn hier großzügig ausgewählt wird
+        #macht den Agenten schneller (Person wird sofort abgeholt, wenn sie die letze Person ist)
+        #ansonsten geschah dies erst, wenn gerade optimiert wird und kein anderere Agent Ort auf Route hat
+        if len(dict_end.keys()) == 1:
+            return stations_pickup, list(dict_end.keys())
+
+        stations_end: list[str] = []
         while amount < bus_capacity and dict_end:
             station_max: str = max(dict_end, key=dict_end.get)
 
@@ -47,17 +52,39 @@ class RoutesAgent(Agent):
                 dict_end.pop(station_max)
                 continue
 
-            if station_max not in stations:
+            if station_max not in stations_pickup:
                 amount += dict_end[station_max]
-                stations.append(station_max)
+                stations_end.append(station_max)
 
             dict_end.pop(station_max)
 
-        return stations
+        return stations_pickup, stations_end
+
+    def _change_direction(self, route: list[str]) -> list[str]:
+        #leere Liste bleibt leer
+        if not route:
+            return route
+
+        moved_start: list[str] = [route[-1]] + route[:-1]
+        moved_start.reverse()
+
+        return moved_start
 
     def _calculate_route(self, bus_capacity: int) -> list[str]:
-        return self.route_calculator.calculate_route(self.model.grid.G, self.pos,
-                                                     self._get_mandatory_nodes(bus_capacity))
+        stations_pickup, stations_end = self._get_mandatory_nodes(bus_capacity)
+
+        route = self.route_calculator.calculate_route(self.model.grid.G, self.pos, stations_pickup+stations_end)
+
+        #stelle sicher, dass am Ende alle einkommen
+        if len(stations_pickup) == 1 and len(stations_end) == 1:
+            index_pickup: int = route.index(stations_pickup[0])
+            index_end: int = route.index(stations_end[0])
+
+            #drehe Route wenn Bus in falsche Richtung fahren will
+            if index_end < index_pickup:
+                return self._change_direction(route)
+
+        return route
 
     def step(self):
         # find available busses waiting for a route
