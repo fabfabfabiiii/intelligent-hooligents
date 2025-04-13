@@ -368,8 +368,19 @@ def _step_callback():
     st.session_state.step_count += 1
     st.rerun()
 
+def _load_config():
+    if "config_loaded" in st.session_state:
+        return
+
+    if config.USE_SEED:
+        print(f'Using seed: {config.SEED}')
+        random.seed(config.SEED)
+
+    st.session_state.config_loaded = True
 
 def main():
+    _load_config()
+
     st.set_page_config(
         page_title="Intelligent Hooligents Model Simulation",
         layout="centered",
