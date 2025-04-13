@@ -63,8 +63,7 @@ class DummyPassengerExchangeHandler(PassengerExchangeHandler):
         # TODO: Implement proper passenger exchange logic
         return [], []
 
-
-def create_model(graph_params, model_params, ml_mode: bool = False):
+def create_streckennetz(graph_params):
     # Create Streckennetz
     streckennetz = None
 
@@ -81,18 +80,23 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
             tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
             tsp_optimizer.solve()
             valid_graph = True
+            return streckennetz
         except:
             valid_graph = False
 
+def create_person_handler(num_people, streckennetz):
+    person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
+
+    for i in range(num_people):
+        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
+                                         random.choice(list(Verein)), current_position='1'))
+    return person_handler
+
+def create_model(streckennetz, person_handler, model_params, ml_mode: bool = False):
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
     passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
-    person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
-
-    for i in range(model_params["num_people"]):
-        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
-                                         random.choice(list(Verein)), current_position='1'))
 
     stadium_node_id = "1"  # todo make this configurable
 
@@ -110,7 +114,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
         bus_capacity=model_params["bus_capacity"]
     )
 
-    return model, streckennetz
+    return model
 
 
 def generate_color_map(agent_ids):
@@ -424,21 +428,21 @@ def main():
     ml_mode = st.sidebar.checkbox("ML Mode")
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
-            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params,
-                                                                                 ml_mode=ml_mode)
-            st.session_state.model_copy = copy.deepcopy(st.session_state.model)
+            st.session_state.streckennetz = create_streckennetz(graph_params)
+            st.session_state.person_handler = create_person_handler(model_params["num_people"], st.session_state.streckennetz)
+            st.session_state.model = create_model(st.session_state.streckennetz, st.session_state.person_handler, model_params, ml_mode=ml_mode)
+
             st.session_state.streckennetz_copy = copy.deepcopy(st.session_state.streckennetz)
+            st.session_state.person_handler_copy = copy.deepcopy(st.session_state.person_handler)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
 
     if st.sidebar.button("Reset Model"):
-        st.session_state.model = copy.deepcopy(st.session_state.model_copy)
         st.session_state.streckennetz = copy.deepcopy(st.session_state.streckennetz_copy)
+        st.session_state.person_handler = copy.deepcopy(st.session_state.person_handler_copy)
+        st.session_state.model = create_model(st.session_state.streckennetz, st.session_state.person_handler, model_params, ml_mode=ml_mode)
         st.session_state.step_count = 0
-        st.session_state.model.passenger_exchange_handler = MLPassengerExchangeHandler(
-            st.session_state.streckennetz) if ml_mode else PassengerExchangeOptimizer(st.session_state.streckennetz)
-        st.rerun()
 
     # Display visualization options
     st.sidebar.header("Visualization Options")
