@@ -34,14 +34,15 @@ class RoutesAgent(Agent):
             stations_pickup.append(station_max)
             dict_start.pop(station_max)
 
-        amount: int = 0
-
         dict_end = self._get_end_stations_for_persons_at(stations_pickup)
 
         #macht den Agenten schneller (Person wird sofort abgeholt, wenn sie die letze Person ist)
         #ansonsten geschah dies erst, wenn gerade optimiert wird und kein anderere Agent Ort auf Route hat
-        if len(dict_end.keys()) == 1:
+        if 1 >= len(dict_end.keys()):
             return stations_pickup, list(dict_end.keys())
+
+
+        amount: int = 0
 
         stations_end: list[str] = []
         while amount < bus_capacity and dict_end:
