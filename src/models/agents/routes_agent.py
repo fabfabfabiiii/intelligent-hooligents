@@ -76,12 +76,12 @@ class RoutesAgent(Agent):
         route = self.route_calculator.calculate_route(self.model.grid.G, self.pos, stations_pickup+stations_end)
 
         #stelle sicher, dass am Ende alle einkommen
-        if len(stations_pickup) == 1 and len(stations_end) == 1:
-            index_pickup: int = route.index(stations_pickup[0])
-            index_end: int = route.index(stations_end[0])
+        if stations_pickup and stations_end:
+            index_pickup: list[int] = [route.index(s) for s in stations_pickup]
+            index_stop: list[int] = [route.index(s) for s in stations_end]
 
             #drehe Route wenn Bus in falsche Richtung fahren will
-            if index_end < index_pickup:
+            if min(index_pickup) > max(index_stop):
                 return self._change_direction(route)
 
         return route
