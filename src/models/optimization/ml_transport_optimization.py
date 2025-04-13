@@ -112,7 +112,7 @@ class MLTransportOptimization:
             poi.quicksum(self.decision_variable_persons[p] *
                          (self.distance_matrix[p][0] - self.distance_matrix[p][2])
             for p in persons),
-            poi.Geq, int(self.optimization_maximum * 0.9))
+            poi.Eq, self.optimization_maximum)
 
         #Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
         obj = poi.quicksum(self.decision_variable_persons[p] * self.satisfaction[p.id][0] +
