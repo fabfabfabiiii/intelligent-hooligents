@@ -106,8 +106,7 @@ class MLTransportOptimization:
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == -1),
             poi.Eq, 0)
 
-        #Optimierung darf maximal 10 Prozent schlechter sein als Optimum
-        #muss das sein, wonach im normalen optimiert wird
+        #Optimierung muss gleich gut sein wie ohne ML
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] *
                          (self.distance_matrix[p][0] - self.distance_matrix[p][2])
