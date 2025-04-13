@@ -20,15 +20,14 @@ class IntelligentHooligentsModel(mesa.Model):
         self.grid = mesa.space.NetworkGrid(graph if isinstance(graph, nx.Graph) else graph.convert_to_networkx())
         for i in range(num_busses):
             agent = BusAgent(self, capacity=bus_capacity, passenger_exchange_handler=passenger_exchange_handler,
-                             person_handler=person_handler, speed=bus_speed)  # todo make capacity configurable
+                             person_handler=person_handler, speed=bus_speed)
             self.agents.add(agent)
             # noinspection PyTypeChecker
-            self.grid.place_agent(agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
+            self.grid.place_agent(agent, stadium_node_id)
         routes_agent = RoutesAgent(self, route_calculator, person_handler)
         self.agents.add(routes_agent)
         # noinspection PyTypeChecker
-        self.grid.place_agent(routes_agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
-        # self.people: list[Person] = []
+        self.grid.place_agent(routes_agent, stadium_node_id)
 
     def step(self):
         """Advance the model by one step."""

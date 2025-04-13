@@ -5,12 +5,8 @@ from models.agents.bus_agent import BusAgent
 from models.person import Person
 from models.person_handler import PersonHandler
 
-
-# from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
-
-
 class RoutesAgent(Agent):
-    """An agent that calculates routes for busses"""
+    """An agent that calculates routes for buses"""
 
     def __init__(self, model, route_calculator: RouteCalculator, person_handler: PersonHandler):
         super().__init__(model)
@@ -22,7 +18,6 @@ class RoutesAgent(Agent):
         """
         Returns a list of mandatory nodes for the route calculation.
         """
-        # TODO das ist nur ne Idee, kp ob das klappt
         dict_start = self._get_stations_start()
 
         amount: int = 0
@@ -36,8 +31,8 @@ class RoutesAgent(Agent):
 
         dict_end, mapping = self._get_end_stations_for_persons_at(stations_pickup)
 
-        #macht den Agenten schneller (Person wird sofort abgeholt, wenn sie die letze Person ist)
-        #ansonsten geschah dies erst, wenn gerade optimiert wird und kein anderere Agent Ort auf Route hat
+        # Person wird sofort abgeholt, wenn sie die letzte Person ist → Performanceoptimierung
+        # ansonsten geschah dies erst, wenn gerade optimiert wird und kein andere Agent den Node auf der Route hat
         if 1 >= len(dict_end.keys()):
             return stations_pickup+list(dict_end.keys()), mapping
 
@@ -62,7 +57,7 @@ class RoutesAgent(Agent):
 
     @staticmethod
     def _change_direction(route: list[str]) -> list[str]:
-        #leere Liste bleibt leer
+        # leere Liste bleibt leer
         if not route:
             return route
 
@@ -92,7 +87,7 @@ class RoutesAgent(Agent):
         return route
 
     def step(self):
-        # find available busses waiting for a route
+        # find available buses waiting for a route
         bus_agents: list[BusAgent] = [agent for agent in self.model.grid.get_cell_list_contents([self.pos]) if
                                       isinstance(agent, BusAgent) and not agent.remaining_route]
         if not bus_agents:
@@ -107,9 +102,9 @@ class RoutesAgent(Agent):
         bus_agents[0].remaining_route = self._calculate_route(capacity)
         self.bus_stations[bus_agents[0].unique_id] = bus_agents[0].remaining_route
 
-    # key: station value: amount
+    # key: station, value: amount
     # dict start, dict endstation
-    # mögliches Problem, wir wissen nicht ob diese Leute ggf in nem Bus sitzen
+    # mögliches Problem, wir wissen nicht ob diese Leute ggf. in nem Bus sitzen
     # mit transport_logic könnten wir das wohl abgreifen...
     def _get_stations_start(self) -> dict[str, int]:
         dict_start: dict[str, int] = {}
@@ -132,7 +127,7 @@ class RoutesAgent(Agent):
         list_mapping: list[tuple[str, str]] = []
 
         for station in stations:
-            persons: list[Person] = self.person_handler.get_people_at_location(station, False)
+            persons: list[Person] = self.person_handler.get_people_at_location(station)
 
             for person in persons:
                 end_station: str = person.zielstation

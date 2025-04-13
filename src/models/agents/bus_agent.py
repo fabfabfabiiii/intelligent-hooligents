@@ -1,12 +1,9 @@
 import mesa
-
 import config
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.action import Action
-# from models.intelligent_hooligents_model import IntelligentHooligentsModel TODO find workaround to have type infos without circular import
 from models.person import Person
 from models.person_handler import PersonHandler
-from models.verein import Verein
 
 
 class BusAgent(mesa.Agent):
@@ -27,13 +24,6 @@ class BusAgent(mesa.Agent):
     def step(self):
         if not self.remaining_route:
             return
-
-        # TODO remove - only for debugging reasons
-        clubA = [person for person in self.passengers if person.verein == Verein.Club_A]
-        clubB = [person for person in self.passengers if person.verein == Verein.Club_B]
-        neutral = [person for person in self.passengers if person.verein == Verein.Neutral]
-        if ((len(clubA) > len(clubB)) and len(clubB) > 0) or ((len(clubB) > len(clubA)) and len(clubA) > 0):
-            raise Exception("es gibt auf die Fresse")
 
         if self.current_edge_length is None:
             # We are currently at a node

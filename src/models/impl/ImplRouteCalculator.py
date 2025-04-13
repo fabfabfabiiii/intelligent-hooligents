@@ -1,9 +1,9 @@
 from typing import cast
+from networkx import Graph
 
 from models.abstract.route_calculator import RouteCalculator
 from models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
 from models.streckennetz import Streckennetz
-from networkx import Graph
 
 
 class ImplRouteCalculator(RouteCalculator):
@@ -14,7 +14,7 @@ class ImplRouteCalculator(RouteCalculator):
         if isinstance(graph, Streckennetz):
             g: Streckennetz = graph
         else:
-            g: Streckennetz = Streckennetz.from_nx_graph(graph, False)
+            g: Streckennetz = Streckennetz.from_nx_graph(graph)
 
         optimizer: TspOptimizer = TspOptimizer(g)
 

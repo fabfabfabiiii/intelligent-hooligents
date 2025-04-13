@@ -1,13 +1,11 @@
 import pickle
 import config
+import pandas as pd
+from sklearn.linear_model import LinearRegression
 
 from models.person import Person
 from models.action import Action
 from models.verein import Verein
-
-import pandas as pd
-
-from sklearn.linear_model import LinearRegression
 
 factor_home_team: int = 1
 factor_neutral: int = 2
@@ -27,11 +25,11 @@ def calculate_satisfaction(person: Person, action: Action) -> int | None:
     elif person.verein == Verein.Club_B:
         factor = factor_away_team
 
-    #zufriedenheit kann nicht negativ sein
+    # Zufriedenheit kann nicht negativ sein
     if current_satisfaction <= 0:
         return 0
 
-    #zufriedenheit bleibt gleich, wenn man ankommt
+    # Zufriedenheit bleibt gleich, wenn man ankommt
     if person.has_arrived():
         return person.get_current_zufriedenheit()
 
@@ -45,8 +43,8 @@ def calculate_satisfaction(person: Person, action: Action) -> int | None:
         return current_satisfaction + 1
 
     if action == action.DRIVING:
-        #sinke um den Faktor, wenn dieser mehr als drei Schritte gleich ist
-        #ansonsten bleibe gleich
+        # sinke um den Faktor, wenn dieser mehr als drei Schritte gleich ist
+        # ansonsten bleibe gleich
         for i in range(3):
             index: int = len(person.zufriedenheit) - (2+i)
             if index < 0 or index >= len(person.zufriedenheit):
@@ -94,7 +92,7 @@ def _create_input_data(ist_angekommen: bool, verein: Verein, action: Action, sat
     elif action == action.EXIT:
         action_exit = 1
 
-    #reihenfolge der Werte ist wichtig, da diese input für ml model
+    # Reihenfolge der Werte ist wichtig, da diese input für ml model
     input_data: pd.DataFrame = pd.DataFrame({
         'ist_angekommen': [1 if ist_angekommen else 0],
         'zufriedenheit_1': [satisfaction[0]],
@@ -113,7 +111,7 @@ def _create_input_data(ist_angekommen: bool, verein: Verein, action: Action, sat
 
     return input_data
 
-#this function uses a ml model to predict the satisfaction of an person
+# this function uses a ml model to predict the satisfaction of a person
 def predict_satisfaction(verein: Verein, satisfaction: list[int], ist_angekommen: True, action: Action) -> int:
     ml_model: LinearRegression = _load_model()
 

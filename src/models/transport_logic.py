@@ -2,7 +2,7 @@ from models.person import Person
 from models.person_handler import PersonHandler
 from models.action import Action
 
-
+# Unused Class -> Created for initial tests
 class TransportLogic:
     def __init__(self, person_handler: PersonHandler):
         self.person_handler: PersonHandler = person_handler
@@ -16,7 +16,7 @@ class TransportLogic:
 
     # rufe nach jedem Tick auf (wenn alle agenten fertig)
     def update(self):
-        for person in self.person_handler.persons:
+        for person in self.person_handler.people:
             if person.id not in self.actions and not person.has_arrived():
                 self.actions[person.id] = Action.WAITING
 
@@ -31,9 +31,9 @@ class TransportLogic:
 
     # gibt notwendige Informationen für einen BusAgent
     def get_people_to_transport(self, station: str) -> list[Person]:
-        persons_at_station: list[Person] = self.person_handler.get_persons_at_location(station, False)
+        persons_at_station: list[Person] = self.person_handler.get_people_at_location(station, False)
 
-        # filtere alles aus, was in diesem Tick angefahren wurde (da diese Personen noch nicht mitgneommen werden können)
+        # filtere alles aus, was in diesem Tick angefahren wurde (da diese Personen noch nicht mitgenommen werden können)
         for bus_id in self.moved_busses:
             persons_at_station = [p for p in persons_at_station if p.id not in self.persons_in_bus[bus_id]]
 
@@ -49,11 +49,11 @@ class TransportLogic:
 
         for person_id in self.persons_in_bus[bus_id][:]:
             if person_id in [p.id for p in persons]:
-                # person bleibt im Bus -> fährt weiter
+                # person bleibt im Bus → fährt weiter
                 self.actions[person_id] = Action.DRIVING
             else:
-                # person fährt nicht mehr mit -> Ausstieg
-                # evtl noch Umstieg möglich?
+                # person fährt nicht mehr mit → Ausstieg
+                # eventuell noch Umstieg möglich?
                 self.actions[person_id] = Action.EXIT
                 self.persons_in_bus[bus_id].remove(person_id)
 

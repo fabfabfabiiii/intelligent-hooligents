@@ -36,26 +36,25 @@ class MLPassengerExchangeHandler(PassengerExchangeHandler):
         predicted_satisfaction: dict[int, tuple[int, int]] = {}
         current_station: str = route[0]
         next_station: str = route[1]
-        #Passenger: mitnahme -> DRIVING, keine Mitnahme -> EXIT
+        # Passenger: mitnahme → DRIVING, keine Mitnahme → EXIT
         for person in passengers:
             driving: int = predict_satisfaction(person.verein, person.zufriedenheit,
                                                     person.zielstation == next_station,
                                                     Action.DRIVING)
 
-            #langer name, weil exit reserviertes wort
             satisfaction_exit: int = predict_satisfaction(person.verein, person.zufriedenheit,
                                                 person.zielstation == current_station,
                                                 Action.EXIT)
 
             predicted_satisfaction[person.id] = (driving, satisfaction_exit)
 
-        #Wartende: mitnahme -> ENTRY, keine Mitnahme -> WAITING
+        # Wartende: mitnahme → ENTRY, keine Mitnahme → WAITING
         for person in persons_at_location:
             entry: int = predict_satisfaction(person.verein, person.zufriedenheit,
                                                 person.zielstation == next_station,
                                                 Action.ENTRY)
 
-            #langer name, weil exit reserviertes wort
+            # langer name, weil exit reserviertes wort
             waiting: int = predict_satisfaction(person.verein, person.zufriedenheit,
                                                 person.zielstation == current_station,
                                                 Action.WAITING)

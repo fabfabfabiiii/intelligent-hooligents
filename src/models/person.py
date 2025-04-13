@@ -17,7 +17,7 @@ class Person:
         else:
             self.verein: Verein = getattr(Verein, verein)
 
-        # Zufriedenheit ist Liste, kriegt pro ZE neue zufriedenheit
+        # Zufriedenheit ist Liste, kriegt pro Zeiteinheit neue Zufriedenheit
         self.zufriedenheit: list[int] = []
         self.zufriedenheit.append(zufriedenheit)
 

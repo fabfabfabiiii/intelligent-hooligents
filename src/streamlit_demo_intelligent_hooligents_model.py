@@ -18,50 +18,8 @@ from models.person_handler import PersonHandler
 from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
 from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
-from models.abstract.route_calculator import RouteCalculator
-from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
 from models.verein import Verein
 
-
-# TODO: Replace with actual implementations
-class DummyRouteCalculator(RouteCalculator):
-    def calculate_route(self, graph, start_node, mandatory_nodes):
-        try:
-            path = [edge[1] for edge in nx.find_cycle(graph, start_node)]
-            return path
-        except nx.NetworkXNoPath:
-            return []
-
-
-class DummyRandomRouteCalculator(RouteCalculator):
-    def calculate_route(self, graph, start_node, mandatory_nodes):
-        try:
-            # Find all simple cycles in the graph
-            all_cycles = list(nx.simple_cycles(graph))
-
-            # Filter cycles that contain the start_node
-            valid_cycles = [cycle for cycle in all_cycles if start_node in cycle]
-
-            if not valid_cycles:
-                return []
-
-            # Randomly select one of the valid cycles
-            selected_cycle = random.choice(valid_cycles)
-
-            # Rotate the cycle so that it starts with the node after start_node and ends with the start_node
-            start_index = selected_cycle.index(start_node) + 1
-            rotated_cycle = selected_cycle[start_index:] + selected_cycle[:start_index]
-
-            return rotated_cycle
-        except nx.NetworkXNoCycle:
-            return []
-
-
-class DummyPassengerExchangeHandler(PassengerExchangeHandler):
-    def handle_passenger_exchange(self, remaining_stops, bus_capacity, current_passengers, people_at_station):
-        # Dummy implementation
-        # TODO: Implement proper passenger exchange logic
-        return [], []
 
 def create_streckennetz(graph_params):
     # Create Streckennetz
@@ -93,14 +51,9 @@ def create_person_handler(num_people, streckennetz):
     return person_handler
 
 def create_model(streckennetz, person_handler, model_params, ml_mode: bool = False):
-    # TODO: Fix model initialization with proper route calculator and passenger exchange handler
-    # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
     passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
-
     stadium_node_id = config.STADIUM_NODE
-
-    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(
@@ -134,7 +87,7 @@ def generate_color_map(agent_ids):
     return st.session_state.agent_colors
 
 
-def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=True):
+def visualize_model_plotly(model, show_agents=True, show_routes=True):
     G = model.grid.G
     pos = nx.spring_layout(G, seed=42)  # For consistent layout
 
@@ -201,10 +154,6 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
         hoverinfo='none',
         showlegend=False
     )
-
-    # Prepare edge data
-    edge_x = []
-    edge_y = []
 
     # Create a separate trace for each edge with its weight
     edge_traces = []
@@ -339,7 +288,6 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
 
     # Create figure
     fig = go.Figure(
-        # data=[node_trace, node_label_trace] + edge_traces + agent_traces + route_traces,
         data=edge_traces + route_traces + [node_trace, node_label_trace] + agent_traces,
         layout=go.Layout(
             title=f"Intelligent Hooligents Model Visualization",
@@ -450,7 +398,7 @@ def main():
     show_routes = st.sidebar.checkbox("Show Routes", True)
 
     # Create plot with Plotly
-    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz, show_agents, show_routes)
+    fig = visualize_model_plotly(st.session_state.model, show_agents, show_routes)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -467,7 +415,7 @@ def main():
             st.write(
                 f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
 
-    # Auto-play controls
+    # Autoplay controls
     auto_play = st.checkbox("Auto-play")
     interval = st.slider("Step Interval (seconds)", 0.01, 5.0, 1.0)
 
