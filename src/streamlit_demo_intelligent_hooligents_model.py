@@ -10,6 +10,7 @@ import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
 from models.ml_passenger_exchange_handler import MLPassengerExchangeHandler
+from models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
 from models.person import Person
 from models.person_handler import PersonHandler
 from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
@@ -17,7 +18,6 @@ from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
 from models.abstract.route_calculator import RouteCalculator
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
-from models.graph_reader import read_graphml
 from models.verein import Verein
 
 
@@ -64,12 +64,23 @@ class DummyPassengerExchangeHandler(PassengerExchangeHandler):
 
 def create_model(graph_params, model_params, ml_mode: bool = False):
     # Create Streckennetz
-    streckennetz = Streckennetz.create_graph(
-        graph_params["num_nodes"],
-        float(graph_params["edge_probability"]) / 100,
-        graph_params["width"],
-        graph_params["height"],
-    )
+    streckennetz = None
+
+    valid_graph = False
+    while not valid_graph:
+        try:
+            streckennetz = Streckennetz.create_graph(
+                graph_params["num_nodes"],
+                float(graph_params["edge_probability"]) / 100,
+                graph_params["width"],
+                graph_params["height"],
+            )
+            tsp_optimizer = TspOptimizer(streckennetz)
+            tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
+            tsp_optimizer.solve()
+            valid_graph = True
+        except:
+            valid_graph = False
 
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
@@ -91,7 +102,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
         stadium_node_id=stadium_node_id,
         route_calculator=route_calculator,
         passenger_exchange_handler=passenger_exchange_handler,
-        person_handler=person_handler,  # TODO: people initialization
+        person_handler=person_handler, # TODO: people initialization
         num_busses=model_params["num_busses"],
         bus_speed=model_params["bus_speed"],
         bus_capacity=model_params["bus_capacity"]
@@ -408,9 +419,19 @@ def main():
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
             st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=ml_mode)
+            st.session_state.state = copy.deepcopy(st.session_state)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
+            #print(st.session_state.model)
+
+    if st.sidebar.button("Reset Model"):
+        print("Test")
+        st.session_state = st.session_state.state
+        #print(st.session_state.model)
+        st.session_state.step_count = 0
+        st.session_state.model.passenger_exchange_handler = MLPassengerExchangeHandler(st.session_state.streckennetz) if ml_mode else PassengerExchangeOptimizer(st.session_state.streckennetz)
+        st.rerun()
 
     # Display visualization options
     st.sidebar.header("Visualization Options")
@@ -418,8 +439,7 @@ def main():
     show_routes = st.sidebar.checkbox("Show Routes", True)
 
     # Create plot with Plotly
-    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz,
-                                 show_agents, show_routes)
+    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz, show_agents, show_routes)
 
     st.plotly_chart(fig, use_container_width=True)
 
