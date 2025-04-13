@@ -1,3 +1,5 @@
+import copy
+
 import streamlit as st
 import networkx as nx
 import plotly.graph_objects as go
@@ -10,6 +12,7 @@ import config
 from models.agents.bus_agent import BusAgent
 from models.impl.ImplRouteCalculator import ImplRouteCalculator
 from models.ml_passenger_exchange_handler import MLPassengerExchangeHandler
+from models.optimization.tsp_optimization import TspOptimizer, TSPOptimizationGoal
 from models.person import Person
 from models.person_handler import PersonHandler
 from models.passenger_exchange_optimizer import PassengerExchangeOptimizer
@@ -17,7 +20,6 @@ from models.streckennetz import Streckennetz
 from models.intelligent_hooligents_model import IntelligentHooligentsModel
 from models.abstract.route_calculator import RouteCalculator
 from models.abstract.passenger_exchange_handler import PassengerExchangeHandler
-from models.graph_reader import read_graphml
 from models.verein import Verein
 
 
@@ -61,29 +63,44 @@ class DummyPassengerExchangeHandler(PassengerExchangeHandler):
         # TODO: Implement proper passenger exchange logic
         return [], []
 
-
-def create_model(graph_params, model_params, ml_mode: bool = False):
+def create_streckennetz(graph_params):
     # Create Streckennetz
-    streckennetz = Streckennetz.create_graph(
-        graph_params["num_nodes"],
-        float(graph_params["edge_probability"]) / 100,
-        graph_params["width"],
-        graph_params["height"],
-    )
+    streckennetz = None
 
+    valid_graph = False
+    while not valid_graph:
+        try:
+            streckennetz = Streckennetz.create_graph(
+                graph_params["num_nodes"],
+                float(graph_params["edge_probability"]) / 100,
+                graph_params["width"],
+                graph_params["height"],
+            )
+            tsp_optimizer = TspOptimizer(streckennetz)
+            tsp_optimizer.prepare_optimization(TSPOptimizationGoal.SHORTEST_ROUTE)
+            tsp_optimizer.solve()
+            valid_graph = True
+            return streckennetz
+        except:
+            valid_graph = False
+
+def create_person_handler(num_people, streckennetz):
+    person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
+
+    for i in range(num_people):
+        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
+                                         random.choice(list(Verein)), current_position='1'))
+    return person_handler
+
+def create_model(streckennetz, person_handler, model_params, ml_mode: bool = False):
     # TODO: Fix model initialization with proper route calculator and passenger exchange handler
     # For now, using dummy implementations
     route_calculator = ImplRouteCalculator()
     passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
-    person_handler: PersonHandler = PersonHandler(dict[tuple[str, Verein], int]())
-
-    for i in range(model_params["num_people"]):
-        person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
-                                         random.choice(list(Verein)), current_position='1'))
 
     stadium_node_id = config.STADIUM_NODE
 
-    #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
+    # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
     # Create model
     model = IntelligentHooligentsModel(
@@ -97,7 +114,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
         bus_capacity=model_params["bus_capacity"]
     )
 
-    return model, streckennetz
+    return model
 
 
 def generate_color_map(agent_ids):
@@ -146,7 +163,9 @@ def visualize_model_plotly(model, streckennetz, show_agents=True, show_routes=Tr
                 agent_type = type(agent).__name__
                 agent_info += f"- {agent_type} (ID: {agent.unique_id})<br>"
         # get all people on the node and exclude the passengers of the bus on the current node
-        people_at_location = [person for person in model.person_handler.get_people_at_location(node, include_arrived_people=False) if person not in all_passengers]
+        people_at_location = [person for person in
+                              model.person_handler.get_people_at_location(node, include_arrived_people=False) if
+                              person not in all_passengers]
         people_text = ""
         if people_at_location:
             people_text = "<br>People at this location:<br>"
@@ -368,6 +387,7 @@ def _step_callback():
     st.session_state.step_count += 1
     st.rerun()
 
+
 def _load_config():
     if "config_loaded" in st.session_state:
         return
@@ -377,6 +397,7 @@ def _load_config():
         random.seed(config.SEED)
 
     st.session_state.config_loaded = True
+
 
 def main():
     _load_config()
@@ -407,10 +428,21 @@ def main():
     ml_mode = st.sidebar.checkbox("ML Mode")
     if 'model' not in st.session_state or st.sidebar.button("Regenerate Model"):
         with st.spinner("Generating model..."):
-            st.session_state.model, st.session_state.streckennetz = create_model(graph_params, model_params, ml_mode=ml_mode)
+            st.session_state.streckennetz = create_streckennetz(graph_params)
+            st.session_state.person_handler = create_person_handler(model_params["num_people"], st.session_state.streckennetz)
+            st.session_state.model = create_model(st.session_state.streckennetz, st.session_state.person_handler, model_params, ml_mode=ml_mode)
+
+            st.session_state.streckennetz_copy = copy.deepcopy(st.session_state.streckennetz)
+            st.session_state.person_handler_copy = copy.deepcopy(st.session_state.person_handler)
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
+
+    if st.sidebar.button("Reset Model"):
+        st.session_state.streckennetz = copy.deepcopy(st.session_state.streckennetz_copy)
+        st.session_state.person_handler = copy.deepcopy(st.session_state.person_handler_copy)
+        st.session_state.model = create_model(st.session_state.streckennetz, st.session_state.person_handler, model_params, ml_mode=ml_mode)
+        st.session_state.step_count = 0
 
     # Display visualization options
     st.sidebar.header("Visualization Options")
@@ -418,8 +450,7 @@ def main():
     show_routes = st.sidebar.checkbox("Show Routes", True)
 
     # Create plot with Plotly
-    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz,
-                                 show_agents, show_routes)
+    fig = visualize_model_plotly(st.session_state.model, st.session_state.streckennetz, show_agents, show_routes)
 
     st.plotly_chart(fig, use_container_width=True)
 
@@ -433,7 +464,8 @@ def main():
         st.write(f"Current Step: {st.session_state.step_count}")
         st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction():.2f}")
         if len(st.session_state.model.person_handler.remaining_people()) == 0:
-            st.write(f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
+            st.write(
+                f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
 
     # Auto-play controls
     auto_play = st.checkbox("Auto-play")
