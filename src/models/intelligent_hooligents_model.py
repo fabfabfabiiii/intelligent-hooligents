@@ -30,12 +30,6 @@ class IntelligentHooligentsModel(mesa.Model):
         self.grid.place_agent(routes_agent, stadium_node_id)  # TODO refactor Streckennetz to use integers as ids?
         # self.people: list[Person] = []
 
-    def __str__(self):
-        str = ""
-        for person in self.person_handler.people:
-            str += f"{person}\r\n"
-        return str
-
     def step(self):
         """Advance the model by one step."""
         self.agents.do("step")

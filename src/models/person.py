@@ -22,7 +22,7 @@ class Person:
         self.zufriedenheit.append(zufriedenheit)
 
     def __str__(self):
-        return f'Id: {self.id}, Location: {self.current_position}, Ziel: {self.zielstation}, Verein: {self.verein}, Zufriedenheit: {self.zufriedenheit}'
+        return f'Id: {self.id}, Location: {self.current_position}, Ziel: {self.zielstation}, Verein: {self.verein}'
 
     def get_current_zufriedenheit(self) -> int:
         return self.zufriedenheit[-1]
