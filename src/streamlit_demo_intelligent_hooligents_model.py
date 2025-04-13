@@ -81,7 +81,7 @@ def create_model(graph_params, model_params, ml_mode: bool = False):
         person_handler.add_person(Person(f'{random.randint(2, streckennetz.num_nodes)}',
                                          random.choice(list(Verein)), current_position='1'))
 
-    stadium_node_id = "1"  # todo make this configurable
+    stadium_node_id = config.STADIUM_NODE
 
     #streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
