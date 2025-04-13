@@ -18,7 +18,7 @@ class RoutesAgent(Agent):
         self.person_handler: PersonHandler = person_handler
         self.bus_stations: dict[int, list[str]] = {}
 
-    def _get_mandatory_nodes(self, bus_capacity: int) -> tuple[list[str], list[str]] | None:
+    def _get_mandatory_nodes(self, bus_capacity: int) -> tuple[list[str], list[tuple[str, str]]] | None:
         """
         Returns a list of mandatory nodes for the route calculation.
         """
@@ -34,13 +34,12 @@ class RoutesAgent(Agent):
             stations_pickup.append(station_max)
             dict_start.pop(station_max)
 
-        dict_end = self._get_end_stations_for_persons_at(stations_pickup)
+        dict_end, mapping = self._get_end_stations_for_persons_at(stations_pickup)
 
         #macht den Agenten schneller (Person wird sofort abgeholt, wenn sie die letze Person ist)
         #ansonsten geschah dies erst, wenn gerade optimiert wird und kein anderere Agent Ort auf Route hat
         if 1 >= len(dict_end.keys()):
-            return stations_pickup, list(dict_end.keys())
-
+            return stations_pickup+list(dict_end.keys()), mapping
 
         amount: int = 0
 
@@ -59,9 +58,10 @@ class RoutesAgent(Agent):
 
             dict_end.pop(station_max)
 
-        return stations_pickup, stations_end
+        return stations_pickup+stations_end, mapping
 
-    def _change_direction(self, route: list[str]) -> list[str]:
+    @staticmethod
+    def _change_direction(route: list[str]) -> list[str]:
         #leere Liste bleibt leer
         if not route:
             return route
@@ -72,18 +72,22 @@ class RoutesAgent(Agent):
         return moved_start
 
     def _calculate_route(self, bus_capacity: int) -> list[str]:
-        stations_pickup, stations_end = self._get_mandatory_nodes(bus_capacity)
+        stations, direction_mapping = self._get_mandatory_nodes(bus_capacity)
 
-        route = self.route_calculator.calculate_route(self.model.grid.G, self.pos, stations_pickup+stations_end)
+        route = self.route_calculator.calculate_route(self.model.grid.G, self.pos, stations)
 
-        #stelle sicher, dass am Ende alle einkommen
-        if stations_pickup and stations_end:
-            index_pickup: list[int] = [route.index(s) for s in stations_pickup]
-            index_stop: list[int] = [route.index(s) for s in stations_end]
+        correct_direction: bool = False
 
-            #drehe Route wenn Bus in falsche Richtung fahren will
-            if min(index_pickup) > max(index_stop):
-                return self._change_direction(route)
+        for start, end in direction_mapping:
+            if start not in route or end not in route:
+                continue
+
+            if route.index(start) < route.index(end):
+                correct_direction = True
+                break
+
+        if not correct_direction:
+            route = self._change_direction(route)
 
         return route
 
@@ -123,8 +127,9 @@ class RoutesAgent(Agent):
 
         return dict_start
 
-    def _get_end_stations_for_persons_at(self, stations: list[str]) -> dict[str, int]:
+    def _get_end_stations_for_persons_at(self, stations: list[str]) -> tuple[dict[str, int], list[tuple[str, str]]] | None:
         dict_end: dict[str, int] = {}
+        list_mapping: list[tuple[str, str]] = []
 
         for station in stations:
             persons: list[Person] = self.person_handler.get_people_at_location(station, False)
@@ -137,4 +142,7 @@ class RoutesAgent(Agent):
                 else:
                     dict_end[end_station] += 1
 
-        return dict_end
+                if (station, end_station) not in list_mapping:
+                    list_mapping.append((station, end_station))
+
+        return dict_end, list_mapping
