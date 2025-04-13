@@ -431,7 +431,7 @@ def main():
 
     with col2:
         st.write(f"Current Step: {st.session_state.step_count}")
-        st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction()}")
+        st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction():.2f}")
         if len(st.session_state.model.person_handler.remaining_people()) == 0:
             st.write(f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
 
