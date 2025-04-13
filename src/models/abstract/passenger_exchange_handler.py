@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 from models.person import Person
 
-
 class PassengerExchangeHandler(ABC):
     """
     Abstract base class for handling passenger exchanges.

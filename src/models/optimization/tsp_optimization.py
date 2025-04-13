@@ -46,11 +46,11 @@ class TspOptimizer:
             self.log.append('Add Linear Constraint')
 
     def _prepare_optimization_shortest_subroute(self, nodes: list[str]) -> None:
-        #Decision variable nodes
+        # Decision variable nodes
         self.decision_variable_nodes = self.model.add_variables(self.graph.nodes, domain=poi.VariableDomain.Binary)
         self.log.append("Add Decision Variables nodes")
 
-        #constraint: visit nodes
+        # constraint: visit nodes
         for n in nodes:
             self.model.add_linear_constraint(self.decision_variable_nodes[n], poi.Eq, 1)
 
@@ -124,7 +124,7 @@ class TspOptimizer:
 
         while len(cycles) > 1:
             for cycle in cycles:
-                #check for both directions, only add existing edges
+                # check for both directions, only add existing edges
                 existing_edges: list[tuple[str, str]] = [(u, v) for (u, v) in combinations(cycle, 2) if (u, v) in self.decision_variable_edges]
                 existing_edges.extend([(v, u) for (u, v) in combinations(cycle, 2) if (v, u) in self.decision_variable_edges])
 

@@ -6,7 +6,7 @@ from models.streckennetz import Streckennetz
 from models.verein import Verein
 
 class MLTransportOptimization:
-    #ich glaube, es sollte unbedingt der gesamte Graph und kein Teilgraph übergeben werden
+    # ich glaube, es sollte unbedingt der gesamte Graph und kein Teilgraph übergeben werden
     def __init__(self, graph: Streckennetz):
         self.log: list[str] = []
 
@@ -17,10 +17,10 @@ class MLTransportOptimization:
         self.is_prepared: bool = False
         self.model = highs.Model()
 
-        #key: person_id, values: (satisfaction_mitnahme, satisfaction_waiting)
+        # key: person_id, values: (satisfaction_mitnahme, satisfaction_waiting)
         self.satisfaction: dict[int, tuple[int, int]] = {}
-        #index: index of persons
-        #(distance now, distance next_step, shortest_distance), -1 if unavailable
+        # index: index of persons
+        # (distance now, distance next_step, shortest_distance), -1 if unavailable
         self.distance_matrix: dict[Person, tuple[int, int, int]] = {}
         self.decision_variable_persons = None
         self.flag_only_one_team = None
@@ -59,12 +59,12 @@ class MLTransportOptimization:
         self.log.append("Add Flags")
 
 
-        #Anzahl mitgenommener Personen darf Kapazität nicht überschreiten
+        # Anzahl mitgenommener Personen darf Kapazität nicht überschreiten
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons), poi.Leq, capacity)
         self.log.append("Add Linear Constraint")
 
-        #Kein Team darf in Überzahl sein
+        # Kein Team darf in Überzahl sein
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if p.verein == Verein.Club_A) -
             poi.quicksum(self.decision_variable_persons[p] for p in persons if p.verein == Verein.Club_B) -
@@ -79,8 +79,8 @@ class MLTransportOptimization:
             poi.Leq, 0
         )
 
-        #Flag überprüfen
-        #flag_only_one_team = no_team_a || no_team_b
+        # Flag überprüfen
+        # flag_only_one_team = no_team_a || no_team_b
         self.model.add_linear_constraint(
             self.flag_no_team_a + self.flag_no_team_b -
             self.flag_only_one_team * 1
@@ -96,24 +96,24 @@ class MLTransportOptimization:
             (1 - self.flag_no_team_b) * len(persons),
             poi.Leq, 0)
 
-        #nehme keine Personen mit, die im Ziel sind (ich glaube das wird benötigt)
+        # nehme keine Personen mit, die im Ziel sind
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == 0),
             poi.Eq, 0)
 
-        #nehme keine Personen mit, die nicht ankommen können (weil -1 uncool)
+        # nehme keine Personen mit, die nicht ankommen können
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == -1),
             poi.Eq, 0)
 
-        #Optimierung muss gleich gut sein wie ohne ML
+        # Optimierung muss gleich gut sein wie ohne ML
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] *
                          (self.distance_matrix[p][0] - self.distance_matrix[p][2])
             for p in persons),
             poi.Eq, self.optimization_maximum)
 
-        #Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
+        # Nun wird danach optimiert, dass die vermutete Zufriedenheit optimal ist
         obj = poi.quicksum(self.decision_variable_persons[p] * self.satisfaction[p.id][0] +
                            (1 - self.decision_variable_persons[p]) * self.satisfaction[p.id][1]
                           for p in persons)
@@ -162,7 +162,7 @@ class MLTransportOptimization:
                 result = graph.get_distance(current_station, person.zielstation)
                 calculated_distances[(current_station, person.zielstation)] = result if isinstance(result, int) else -1
 
-            #wenn man vom start sein Ziel über diese Strecke nicht erreichen kann, kann man es nie erreichen
+            # wenn man vom start sein Ziel über diese Strecke nicht erreichen kann, kann man es nie erreichen
             if calculated_distances[(current_station, person.zielstation)] == -1:
                 distance_matrix[person] = (-1, -1, -1)
                 continue

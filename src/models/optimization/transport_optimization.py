@@ -6,7 +6,7 @@ from models.streckennetz import Streckennetz
 from models.verein import Verein
 
 class TransportOptimization:
-    #ich glaube, es sollte unbedingt der gesamte Graph und kein Teilgraph übergeben werden
+    # ich glaube, es sollte unbedingt der gesamte Graph und kein Teilgraph übergeben werden
     def __init__(self, graph: Streckennetz):
         self.log: list[str] = []
 
@@ -17,8 +17,8 @@ class TransportOptimization:
         self.is_prepared: bool = False
         self.model = highs.Model()
 
-        #index: index of persons
-        #(distance now, distance next_step, shortest_distance), -1 if unavailable
+        # index: index of persons
+        # (distance now, distance next_step, shortest_distance), -1 if unavailable
         self.distance_matrix: dict[Person, tuple[int, int, int]] = {}
         self.decision_variable_persons = None
         self.flag_only_one_team = None
@@ -48,12 +48,12 @@ class TransportOptimization:
         self.log.append("Add Flags")
 
 
-        #Anzahl mitgenommener Personen darf Kapazität nicht überschreiten
+        # Anzahl mitgenommener Personen darf Kapazität nicht überschreiten
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons), poi.Leq, capacity)
         self.log.append("Add Linear Constraint")
 
-        #Kein Team darf in Überzahl sein
+        # Kein Team darf in Überzahl sein
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if p.verein == Verein.Club_A) -
             poi.quicksum(self.decision_variable_persons[p] for p in persons if p.verein == Verein.Club_B) -
@@ -68,8 +68,8 @@ class TransportOptimization:
             poi.Leq, 0
         )
 
-        #Flag überprüfen
-        #flag_only_one_team = no_team_a || no_team_b
+        # Flag überprüfen
+        # flag_only_one_team = no_team_a || no_team_b
         self.model.add_linear_constraint(
             self.flag_no_team_a + self.flag_no_team_b -
             self.flag_only_one_team * 1
@@ -85,22 +85,17 @@ class TransportOptimization:
             (1 - self.flag_no_team_b) * len(persons),
             poi.Leq, 0)
 
-        #nehme keine Personen mit, die im Ziel sind (ich glaube das wird benötigt)
+        # nehme keine Personen mit, die im Ziel sind
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == 0),
             poi.Eq, 0)
 
-        #nehme keine Personen mit, die nicht ankommen können (weil -1 uncool)
+        # nehme keine Personen mit, die nicht ankommen können
         self.model.add_linear_constraint(
             poi.quicksum(self.decision_variable_persons[p] for p in persons if self.distance_matrix[p][0] == -1),
             poi.Eq, 0)
 
-        #mminimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
-        #obj = poi.quicksum(self.decision_variable_persons[p] * self.distance_matrix[p][2] for p in persons)
-        #neue Optimierung: maximiere nach der Veränderung der mitgenommenen Leute - max_möglich
-        #obj = poi.quicksum(self.decision_variable_persons[p] *
-        #                   (self.distance_matrix[p][0] - self.distance_matrix[p][1] - self.distance_matrix[p][2])
-        #                   for p in persons)
+        # minimiere danach, wie viel die Personen von ihrem Zielort entfernt sind
         obj = poi.quicksum(self.decision_variable_persons[p] *
                            (self.distance_matrix[p][0] - self.distance_matrix[p][2])
                            for p in persons)
@@ -141,14 +136,11 @@ class TransportOptimization:
             self.log.append("No result available. Please solve the optimization first")
             return None
 
-        transported_people: list[Person] = [person for person in self.persons if self.model.get_variable_attribute(
-            self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]
-
         value: int = 0
         for person in [person for person in self.persons if self.model.get_variable_attribute(
                 self.decision_variable_persons[person], poi.VariableAttribute.Value) > 0.99]:
 
-            #muss ggf angepasst werden, wenn optimierungsfkt nochmal geändert wird
+            # muss ggf. angepasst werden, wenn Optimierungsfunktion nochmal geändert wird
             value += self.distance_matrix[person][0] - self.distance_matrix[person][2]
 
         return value
@@ -166,7 +158,7 @@ class TransportOptimization:
                 result = graph.get_distance(current_station, person.zielstation)
                 calculated_distances[(current_station, person.zielstation)] = result if isinstance(result, int) else -1
 
-            #wenn man vom start sein Ziel über diese Strecke nicht erreichen kann, kann man es nie erreichen
+            # wenn man vom start sein Ziel über diese Strecke nicht erreichen kann, kann man es nie erreichen
             if calculated_distances[(current_station, person.zielstation)] == -1:
                 distance_matrix[person] = (-1, -1, -1)
                 continue

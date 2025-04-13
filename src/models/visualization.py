@@ -1,7 +1,3 @@
-import sys
-import random
-import os
-
 import matplotlib.pyplot as plt
 import networkx as nx
 from networkx import Graph

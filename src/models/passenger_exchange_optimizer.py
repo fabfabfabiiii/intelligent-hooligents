@@ -41,7 +41,7 @@ class PassengerExchangeOptimizer(PassengerExchangeHandler):
             for person in boarding_people:
                 print(f'{person}')
 
-            #Personen für die Optimierung:
+            # Personen für die Optimierung:
             print(f'Personen für Optimierung:')
             print('in Bus:')
             for person in passengers:

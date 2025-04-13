@@ -1,6 +1,5 @@
 from models.verein import Verein
 
-GRAPHML_PATH: str = "../resources/20250408_Verkehrsnetz.graphml"
 ML_MODEL_PATH: str = "../resources/satisfaction_model.pkl"
 USE_SEED: bool = True
 SEED: int = 127456981
@@ -15,13 +14,3 @@ NODE_SIZE: int = 500
 FONT_WEIGHT: str = 'bold'
 DEBUGGING: bool = True
 STADIUM_NODE: str = '1'
-
-# Dict to create people
-# {(ziel, verein): anzahl_personen}
-peoples: dict[tuple[str, Verein], int] = {
-    ('ziel 1', Verein.Club_A): 100,
-    ('ziel 1', Verein.Club_B): 100,
-    ('ziel 2', Verein.Club_A): 10,
-    ('ziel 2', Verein.Club_B): 100,
-    ('ziel 3', Verein.Club_A): 40,
-}
