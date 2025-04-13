@@ -14,6 +14,7 @@ FONT_SIZE: int = 10
 NODE_SIZE: int = 500
 FONT_WEIGHT: str = 'bold'
 DEBUGGING: bool = True
+STADIUM_NODE: str = '1'
 
 # Dict to create people
 # {(ziel, verein): anzahl_personen}

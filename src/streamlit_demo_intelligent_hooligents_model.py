@@ -98,7 +98,7 @@ def create_model(streckennetz, person_handler, model_params, ml_mode: bool = Fal
     route_calculator = ImplRouteCalculator()
     passenger_exchange_handler = MLPassengerExchangeHandler(streckennetz) if ml_mode else PassengerExchangeOptimizer(streckennetz)
 
-    stadium_node_id = "1"  # todo make this configurable
+    stadium_node_id = config.STADIUM_NODE
 
     # streckennetz: Streckennetz = Streckennetz.from_nx_graph(read_graphml(config.GRAPHML_PATH))
 
@@ -462,7 +462,7 @@ def main():
 
     with col2:
         st.write(f"Current Step: {st.session_state.step_count}")
-        st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction()}")
+        st.write(f"Satisfaction Ø: {st.session_state.model.person_handler.average_satisfaction():.2f}")
         if len(st.session_state.model.person_handler.remaining_people()) == 0:
             st.write(
                 f"Finished transporting {len(st.session_state.model.person_handler.people)} people in {st.session_state.step_count} steps")
