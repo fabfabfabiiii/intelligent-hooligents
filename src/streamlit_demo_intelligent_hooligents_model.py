@@ -431,13 +431,10 @@ def main():
             st.session_state.step_count = 0
             if 'agent_colors' in st.session_state:
                 del st.session_state.agent_colors  # Reset colors when regenerating model
-            # print(st.session_state.model)
 
     if st.sidebar.button("Reset Model"):
-        print("Test")
         st.session_state.model = copy.deepcopy(st.session_state.model_copy)
         st.session_state.streckennetz = copy.deepcopy(st.session_state.streckennetz_copy)
-        # print(st.session_state.model)
         st.session_state.step_count = 0
         st.session_state.model.passenger_exchange_handler = MLPassengerExchangeHandler(
             st.session_state.streckennetz) if ml_mode else PassengerExchangeOptimizer(st.session_state.streckennetz)
